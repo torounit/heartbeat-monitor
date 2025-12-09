@@ -10,5 +10,6 @@ void setup()
 void loop()
 {
     // Add your heartbeat monitoring code here
+    Serial.println("Heartbeat Monitor Running...");
     delay(1000);
 }
