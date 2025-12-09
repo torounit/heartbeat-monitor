@@ -1,0 +1,14 @@
+{
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.formatOnSave": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true
+  },
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "platformio-ide.useBuiltinPIOCore": true,
+  "terminal.integrated.defaultProfile.osx": "zsh"
+}
