@@ -1,48 +1,22 @@
 #include <Arduino.h>
 #include <WiFiS3.h>
 #include <ArduinoHttpClient.h>
-#include <Arduino_LED_Matrix.h>
 #include "config.h"
 #include "secrets.h"
 #include "led_matrix.h"
 
-// LED Matrix instance
-ArduinoLEDMatrix matrix;
-
 // WiFi client
 WiFiSSLClient wifiSSLClient;
-HttpClient httpClient = HttpClient(wifiSSLClient, "heartbeat-monitor.torounit.workers.dev", 443);
+HttpClient httpClient = HttpClient(wifiSSLClient, WORKER_HOSTNAME, 443);
 
 enum State {
   STATE_STARTUP,           // 起動中
   STATE_CONNECTING,      // WiFi接続試行中
   STATE_SUCCESS,         // 通信成功
   STATE_FAILURE,         // 通信失敗
-  STATE_WIFI_DISCONNECTED // WiFi切断
 };
 
 State currentState = STATE_STARTUP;
-
-
-void displayConnecting() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_BOUNCING_BALL);
-  matrix.play(true);
-}
-
-void displayConnected() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_HEARTBEAT_LINE);
-  matrix.play(true);
-}
-
-void displayDisconnected() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_WIFI_SEARCH);
-  matrix.play(true);
-}
-
-void displayFailure() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_BLINK);
-  matrix.play(true);
-}
 
 void setState(State newState) {
 
@@ -61,9 +35,6 @@ void setState(State newState) {
       break;
     case STATE_FAILURE:
       displayFailure();
-      break;
-    case STATE_WIFI_DISCONNECTED:
-      displayDisconnected();
       break;
   }
 }
@@ -99,14 +70,12 @@ void connectWiFi() {
     Serial.println(WiFi.localIP());
   } else {
     Serial.println("\nWiFi connection failed");
-    setState(STATE_WIFI_DISCONNECTED);
   }
 }
 
 // Workerへのハートビート送信
 void sendHeartbeat() {
   if (WiFi.status() != WL_CONNECTED) {
-    setState(STATE_WIFI_DISCONNECTED);
     return;
   }
 
@@ -137,9 +106,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
   Serial.println("Heartbeat Monitor Started");
-
-  // Initialize LED Matrix
-  matrix.begin();
+  initLedMatrix();
 
   setState(STATE_CONNECTING);
 }
