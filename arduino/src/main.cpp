@@ -111,7 +111,10 @@ void sendHeartbeat() {
   }
 
   Serial.println("Sending heartbeat check...");
+  httpClient.beginRequest();
   httpClient.get("/");
+  httpClient.sendHeader("X-location", WIFI_SSID);
+  httpClient.endRequest();
 
   int statusCode = httpClient.responseStatusCode();
   String response = httpClient.responseBody();
