@@ -4,6 +4,7 @@
 #include <Arduino_LED_Matrix.h>
 #include "config.h"
 #include "secrets.h"
+#include "led_matrix.h"
 
 // LED Matrix instance
 ArduinoLEDMatrix matrix;
@@ -13,17 +14,18 @@ WiFiSSLClient wifiSSLClient;
 HttpClient httpClient = HttpClient(wifiSSLClient, "heartbeat-monitor.torounit.workers.dev", 443);
 
 enum State {
+  STATE_STARTUP,           // 起動中
   STATE_CONNECTING,      // WiFi接続試行中
   STATE_SUCCESS,         // 通信成功
   STATE_FAILURE,         // 通信失敗
   STATE_WIFI_DISCONNECTED // WiFi切断
 };
 
-State currentState = STATE_CONNECTING;
+State currentState = STATE_STARTUP;
 
 
 void displayConnecting() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_LOAD);
+  matrix.loadSequence(LEDMATRIX_ANIMATION_BOUNCING_BALL);
   matrix.play(true);
 }
 
@@ -38,7 +40,7 @@ void displayDisconnected() {
 }
 
 void displayFailure() {
-  matrix.loadSequence(LEDMATRIX_ANIMATION_BOUNCING_BALL);
+  matrix.loadSequence(LEDMATRIX_ANIMATION_BLINK);
   matrix.play(true);
 }
 
@@ -79,6 +81,7 @@ void connectWiFi() {
   Serial.println(WIFI_SSID);
 
   setState(STATE_CONNECTING);
+
 
   // タイムアウト付きWiFi接続
   unsigned long startTime = millis();
