@@ -15,7 +15,14 @@
       "persist": true,
       "head_sampling_rate": 1
     }
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "heartbeat-monitor",
+      "database_id": "9535b33c-3f64-466b-b5a2-c4a1fc9f4b83"
+    }
+  ]
   // "compatibility_flags": [
   //   "nodejs_compat"
   // ],
@@ -34,18 +41,7 @@
   //     "bucket_name": "my-bucket"
   //   }
   // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
   // "ai": {
   //   "binding": "AI"
   // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
 }
