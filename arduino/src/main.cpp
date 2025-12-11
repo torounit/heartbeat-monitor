@@ -21,6 +21,7 @@ enum State {
 
 State currentState = STATE_CONNECTING;
 
+
 void displayConnecting() {
   matrix.loadSequence(LEDMATRIX_ANIMATION_LOAD);
   matrix.play(true);
@@ -41,6 +42,31 @@ void displayFailure() {
   matrix.play(true);
 }
 
+void setState(State newState) {
+
+  if (currentState == newState) {
+    return;
+  }
+
+  currentState = newState;
+
+  switch (currentState) {
+    case STATE_CONNECTING:
+      displayConnecting();
+      break;
+    case STATE_SUCCESS:
+      displayConnected();
+      break;
+    case STATE_FAILURE:
+      displayFailure();
+      break;
+    case STATE_WIFI_DISCONNECTED:
+      displayDisconnected();
+      break;
+  }
+}
+
+
 
 // WiFi接続処理
 void connectWiFi() {
@@ -52,7 +78,7 @@ void connectWiFi() {
   Serial.print("Attempting to connect to WiFi: ");
   Serial.println(WIFI_SSID);
 
-  currentState = STATE_CONNECTING;
+  setState(STATE_CONNECTING);
 
   // タイムアウト付きWiFi接続
   unsigned long startTime = millis();
@@ -70,20 +96,18 @@ void connectWiFi() {
     Serial.println(WiFi.localIP());
   } else {
     Serial.println("\nWiFi connection failed");
-    currentState = STATE_WIFI_DISCONNECTED;
+    setState(STATE_WIFI_DISCONNECTED);
   }
 }
 
 // Workerへのハートビート送信
 void sendHeartbeat() {
   if (WiFi.status() != WL_CONNECTED) {
-    currentState = STATE_WIFI_DISCONNECTED;
+    setState(STATE_WIFI_DISCONNECTED);
     return;
   }
 
   Serial.println("Sending heartbeat check...");
-  currentState = STATE_CONNECTING;
-
   httpClient.get("/");
 
   int statusCode = httpClient.responseStatusCode();
@@ -95,10 +119,10 @@ void sendHeartbeat() {
   Serial.println(response);
 
   if (statusCode == 200) {
-    currentState = STATE_SUCCESS;
+    setState(STATE_SUCCESS);
     Serial.println("Heartbeat successful!");
   } else {
-    currentState = STATE_FAILURE;
+    setState(STATE_FAILURE);
     Serial.println("Heartbeat failed!");
   }
 }
@@ -111,27 +135,11 @@ void setup() {
   // Initialize LED Matrix
   matrix.begin();
 
-  currentState = STATE_CONNECTING;
+  setState(STATE_CONNECTING);
 }
 
 void loop() {
 
-
-  // Update LED display based on current state
-  switch (currentState) {
-    case STATE_CONNECTING:
-      displayConnecting();
-      break;
-    case STATE_SUCCESS:
-      displayConnected();
-      break;
-    case STATE_FAILURE:
-      displayFailure();
-      break;
-    case STATE_WIFI_DISCONNECTED:
-      displayDisconnected();
-      break;
-  }
 
   // Check WiFi connection status
   if (WiFi.status() != WL_CONNECTED) {
