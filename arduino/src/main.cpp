@@ -80,10 +80,9 @@ void sendHeartbeat() {
   }
 
   Serial.println("Sending heartbeat check...");
-  httpClient.beginRequest();
-  httpClient.get("/");
-  httpClient.sendHeader("X-location", WIFI_SSID);
-  httpClient.endRequest();
+  char json[128];
+  sprintf(json, "{\"location\":\"%s\"}", WIFI_SSID);
+  httpClient.post("/api/heartbeat", "application/json", json);
 
   int statusCode = httpClient.responseStatusCode();
   String response = httpClient.responseBody();
@@ -93,7 +92,7 @@ void sendHeartbeat() {
   Serial.print("Response: ");
   Serial.println(response);
 
-  if (statusCode == 200) {
+  if (statusCode >= 200 && statusCode < 300) {
     setState(STATE_SUCCESS);
     Serial.println("Heartbeat successful!");
   } else {
