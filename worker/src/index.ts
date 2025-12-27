@@ -14,14 +14,26 @@ app.get("/api/heartbeat", async (c) => {
   const location = c.req.header("x-location");
   if (location) {
     const db = drizzle(c.env.DB);
-    const result = await db
-      .insert(logs)
-      .values({
-        location,
-      })
-      .returning();
+    await db.insert(logs).values({
+      location,
+    });
 
     return c.json({ status: "OK" });
+  }
+
+  return c.json({ status: "Bad Request" }, 500);
+});
+
+app.post("/api/heartbeat", async (c) => {
+  const body = await c.req.json();
+  const { location } = body;
+  if (location) {
+    const db = drizzle(c.env.DB);
+    await db.insert(logs).values({
+      location,
+    });
+
+    return c.json({ status: "Created" }, 201);
   }
 
   return c.json({ status: "Bad Request" }, 500);
