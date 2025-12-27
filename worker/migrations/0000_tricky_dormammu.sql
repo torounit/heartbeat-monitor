@@ -1,0 +1,5 @@
+CREATE TABLE `logs` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`name` text NOT NULL,
+	`createdAt` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
