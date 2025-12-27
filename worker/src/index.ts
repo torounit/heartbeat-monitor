@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const app = new Hono()
+const app = new Hono();
 
-app.get('/', (c) => {
-  const location = c.req.header('x-location')
-  console.log(location)
-  return c.json({ status: 'ok' })
-})
+app.get("/", (c) => {
+  const location = c.req.header("x-location");
+  console.log(location);
+  return c.json({ status: "ok" });
+});
 
-export default app
+export default app;
