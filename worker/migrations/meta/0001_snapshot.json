@@ -1,0 +1,52 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "66497407-d6fa-409e-944a-de2a2e6dfd94",
+  "prevId": "6ba638e9-40be-41b6-9975-bb021c98422b",
+  "tables": {
+    "logs": {
+      "name": "logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {
+      "\"logs\".\"createdAt\"": "\"logs\".\"created_at\""
+    }
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

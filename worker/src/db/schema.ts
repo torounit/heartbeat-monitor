@@ -4,8 +4,7 @@ import { sql } from "drizzle-orm";
 export const usersTable = sqliteTable("logs", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
-  createdAt: text()
+  createdAt: text("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-
 });

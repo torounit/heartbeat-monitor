@@ -1,0 +1,1 @@
+ALTER TABLE `logs` RENAME COLUMN "createdAt" TO "created_at";
