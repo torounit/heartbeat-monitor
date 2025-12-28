@@ -14,29 +14,30 @@ app.get("/", (c) => {
   return c.json({ status: "ok" });
 });
 
-app.post('/api/location/register',
+app.post(
+  "/api/location/register",
   zValidator(
-    'json',
+    "json",
     z.object({
       name: z.string(),
     }),
   ),
   async (c) => {
-    const data = c.req.valid('json');
+    const data = c.req.valid("json");
     const db = drizzle(c.env.DB, { schema });
     const existingLocation = await db.query.locations.findFirst({
       where: eq(schema.locations.name, data.name),
     });
 
     if (existingLocation) {
-      return c.json({ status: 'Location Already Exists' }, 409);
+      return c.json({ status: "Location Already Exists" }, 409);
     }
 
     await db.insert(schema.locations).values({
       name: data.name,
     });
 
-    return c.json({ status: 'Location Registered' }, 201);
+    return c.json({ status: "Location Registered" }, 201);
   },
 );
 
