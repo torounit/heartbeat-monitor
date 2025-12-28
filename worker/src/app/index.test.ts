@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { describe, it, expect } from "vitest";
 import { env } from "cloudflare:test";
-import app from "./";
+import app from "..";
 
 describe("GET /", () => {
   it("should return status ok", async () => {
@@ -12,10 +12,10 @@ describe("GET /", () => {
   });
 });
 
-describe("POST /api/location/register", () => {
+describe("POST /api/locations/register", () => {
   it("should register a new location", async () => {
     const res = await app.request(
-      "/api/location/register",
+      "/api/locations/register",
       {
         method: "POST",
         headers: new Headers({ "Content-Type": "application/json" }),
@@ -49,7 +49,7 @@ describe("POST /api/heartbeat", () => {
 it("should accept heartbeat for existing location", async () => {
   // First, register the location
   await app.request(
-    "/api/location/register",
+    "/api/locations/register",
     {
       method: "POST",
       headers: new Headers({ "Content-Type": "application/json" }),
