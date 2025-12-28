@@ -3,7 +3,7 @@ import { sql, relations } from "drizzle-orm";
 
 export const locations = sqliteTable("locations", {
   id: int().primaryKey({ autoIncrement: true }),
-  name: text().notNull(),
+  name: text().notNull().unique(),
 });
 
 export const logs = sqliteTable("logs", {
