@@ -63,7 +63,7 @@ app.post(
       locationId: location.id,
     });
 
-    return c.json({ status: "Created" }, 201);
+    return c.json({ status: "Heartbeat Logged" }, 201);
   },
 );
 
