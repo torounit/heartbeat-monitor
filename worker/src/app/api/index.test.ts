@@ -20,7 +20,6 @@ describe("POST /heartbeat", () => {
 });
 
 it("should accept heartbeat for existing location", async () => {
-  // Now, send heartbeat
   const res = await api.request(
     "/heartbeat",
     {

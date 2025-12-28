@@ -1,8 +1,6 @@
-import { Hono } from "hono";
 import { describe, it, expect } from "vitest";
 import { env } from "cloudflare:test";
 import app from "..";
-import { createBasicAuthHeader } from "../../test/utilities";
 
 describe("GET /", () => {
   it("should return status ok", async () => {
