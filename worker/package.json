@@ -9,6 +9,8 @@
     "generate-migration": "drizzle-kit generate",
     "migrate:local": "wrangler d1 migrations apply heartbeat-monitor --local",
     "migrate:remote": "wrangler d1 migrations apply heartbeat-monitor --remote",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write ."
   },
   "dependencies": {

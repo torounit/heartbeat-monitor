@@ -1,10 +1,10 @@
-import { drizzle } from "drizzle-orm/d1";
+import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
 
 import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
 
 import * as schema from "../../db/schema";
 

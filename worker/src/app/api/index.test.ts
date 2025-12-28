@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { env } from "cloudflare:test";
-import api  from "./index";
+import { describe, expect, it } from "vitest";
+import api from "./index";
 
 describe("POST /heartbeat", () => {
   it("should return 404 for unknown location", async () => {

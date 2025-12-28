@@ -1,8 +1,8 @@
+import { env } from "cloudflare:test";
 import { Hono } from "hono";
 import { describe, it, expect } from "vitest";
-import { env } from "cloudflare:test";
-import locations from "./locations";
 import { createBasicAuthHeader } from "../../../test/utilities";
+import locations from "./locations";
 
 describe("POST register", () => {
   it("should register a new location", async () => {
