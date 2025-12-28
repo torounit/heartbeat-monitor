@@ -1,5 +1,4 @@
 import { env } from "cloudflare:test";
-import { Hono } from "hono";
 import { describe, it, expect } from "vitest";
 import { createBasicAuthHeader } from "../../../test/utilities";
 import locations from "./locations";

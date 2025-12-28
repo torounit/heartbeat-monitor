@@ -1,20 +1,19 @@
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
+import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
-
 import { z } from "zod";
 
 import * as schema from "../../db/schema";
 
 const locations = new Hono<{ Bindings: CloudflareBindings }>();
-
 locations.use("*", async (c, next) => {
   const auth = basicAuth({
     username: c.env.BASIC_AUTH_USERNAME,
     password: c.env.BASIC_AUTH_PASSWORD,
-  });
+  }) as MiddlewareHandler<{ Bindings: CloudflareBindings }>;
   return auth(c, next);
 });
 
