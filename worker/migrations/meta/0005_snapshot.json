@@ -25,9 +25,7 @@
       "indexes": {
         "locations_name_unique": {
           "name": "locations_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -68,12 +66,8 @@
           "name": "logs_location_id_locations_id_fk",
           "tableFrom": "logs",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

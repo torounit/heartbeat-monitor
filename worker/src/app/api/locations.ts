@@ -1,12 +1,22 @@
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
+
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
 import * as schema from "../../db/schema";
 
 const locations = new Hono<{ Bindings: CloudflareBindings }>();
+
+locations.use("*", async (c, next) => {
+  const auth = basicAuth({
+    username: c.env.BASIC_AUTH_USERNAME,
+    password: c.env.BASIC_AUTH_PASSWORD,
+  });
+  return auth(c, next);
+});
 
 locations.post(
   "/register",
@@ -34,5 +44,26 @@ locations.post(
     return c.json({ status: "Location Registered" }, 201);
   },
 );
+
+locations.get("/", async (c) => {
+  const db = drizzle(c.env.DB, { schema });
+  const allLocations = await db.query.locations.findMany();
+  return c.json(allLocations);
+});
+
+locations.delete("/:name", async (c) => {
+  const name = c.req.param("name");
+  const db = drizzle(c.env.DB, { schema });
+  const deleteCount = await db
+    .delete(schema.locations)
+    .where(eq(schema.locations.name, name))
+    .returning();
+
+  if (deleteCount.length === 0) {
+    return c.json({ status: "Location Not Found" }, 404);
+  }
+
+  return c.json({ status: "Location Deleted" });
+});
 
 export default locations;

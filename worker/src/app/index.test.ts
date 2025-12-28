@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describe, it, expect } from "vitest";
 import { env } from "cloudflare:test";
 import app from "..";
+import { createBasicAuthHeader } from "../../test/utilities";
 
 describe("GET /", () => {
   it("should return status ok", async () => {
@@ -18,7 +19,13 @@ describe("POST /api/locations/register", () => {
       "/api/locations/register",
       {
         method: "POST",
-        headers: new Headers({ "Content-Type": "application/json" }),
+        headers: new Headers({
+          "Content-Type": "application/json",
+          Authorization: createBasicAuthHeader(
+            env.BASIC_AUTH_USERNAME,
+            env.BASIC_AUTH_PASSWORD,
+          ),
+        }),
         body: JSON.stringify({ name: "Test Location" }),
       },
       env,
@@ -52,7 +59,13 @@ it("should accept heartbeat for existing location", async () => {
     "/api/locations/register",
     {
       method: "POST",
-      headers: new Headers({ "Content-Type": "application/json" }),
+      headers: new Headers({
+        "Content-Type": "application/json",
+        Authorization: createBasicAuthHeader(
+          env.BASIC_AUTH_USERNAME,
+          env.BASIC_AUTH_PASSWORD,
+        ),
+      }),
       body: JSON.stringify({ name: "Heartbeat Location" }),
     },
     env,

@@ -1,7 +1,6 @@
 import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../src/db/schema";
-import { eq } from "drizzle-orm";
 
 const db = drizzle(env.DB, { schema });
 
