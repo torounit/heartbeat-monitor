@@ -1,6 +1,10 @@
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
-import { logs } from "./db/schema";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+
+import * as schema from "./db/schema";
+import { eq } from "drizzle-orm";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -10,33 +14,56 @@ app.get("/", (c) => {
   return c.json({ status: "ok" });
 });
 
-app.get("/api/heartbeat", async (c) => {
-  const location = c.req.header("x-location");
-  if (location) {
-    const db = drizzle(c.env.DB);
-    await db.insert(logs).values({
-      location,
+app.post('/api/location/register',
+  zValidator(
+    'json',
+    z.object({
+      name: z.string(),
+    }),
+  ),
+  async (c) => {
+    const data = c.req.valid('json');
+    const db = drizzle(c.env.DB, { schema });
+    const existingLocation = await db.query.locations.findFirst({
+      where: eq(schema.locations.name, data.name),
     });
 
-    return c.json({ status: "OK" });
-  }
+    if (existingLocation) {
+      return c.json({ status: 'Location Already Exists' }, 409);
+    }
 
-  return c.json({ status: "Bad Request" }, 500);
-});
+    await db.insert(schema.locations).values({
+      name: data.name,
+    });
 
-app.post("/api/heartbeat", async (c) => {
-  const body = await c.req.json();
-  const { location } = body;
-  if (location) {
-    const db = drizzle(c.env.DB);
-    await db.insert(logs).values({
-      location,
+    return c.json({ status: 'Location Registered' }, 201);
+  },
+);
+
+app.post(
+  "/api/heartbeat",
+  zValidator(
+    "json",
+    z.object({
+      location: z.string(),
+    }),
+  ),
+  async (c) => {
+    const data = c.req.valid("json");
+    const db = drizzle(c.env.DB, { schema });
+    const location = await db.query.locations.findFirst({
+      where: eq(schema.locations.name, data.location),
+    });
+
+    if (!location) {
+      return c.json({ status: "Location Not Found" }, 404);
+    }
+    await db.insert(schema.logs).values({
+      locationId: location.id,
     });
 
     return c.json({ status: "Created" }, 201);
-  }
-
-  return c.json({ status: "Bad Request" }, 500);
-});
+  },
+);
 
 export default app;
