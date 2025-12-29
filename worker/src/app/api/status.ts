@@ -2,6 +2,68 @@ import { eq } from "drizzle-orm";
 import * as schema from "../../db/schema";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
 
+interface StatusInfo {
+  location: string;
+  status: "ok" | "warn" | "error" | "pending";
+  message?: string;
+  lastLogAt?: string;
+  timeSinceLastLogSeconds?: number;
+}
+
+/**
+ * ログの時刻差分からステータスを判定
+ */
+function determineStatus(
+  locationName: string,
+  latestLog: (typeof schema.logs.$inferSelect) | undefined | null,
+): StatusInfo {
+  if (!latestLog) {
+    return {
+      location: locationName,
+      status: "pending",
+      message: "No logs recorded yet",
+    };
+  }
+
+  const latestLogTime = new Date(latestLog.createdAt);
+  const currentTime = new Date();
+  const timeDiffSeconds = Math.floor(
+    (currentTime.getTime() - latestLogTime.getTime()) / 1000,
+  );
+  const oneMinuteSeconds = 60;
+  const fiveMinutesSeconds = 5 * 60;
+
+  // 5分以上ログがない場合はerror
+  if (timeDiffSeconds > fiveMinutesSeconds) {
+    return {
+      location: locationName,
+      status: "error",
+      message: "No logs in the last 5 minutes",
+      lastLogAt: latestLog.createdAt,
+      timeSinceLastLogSeconds: timeDiffSeconds,
+    };
+  }
+
+  // 1分以上ログがない場合はwarn
+  if (timeDiffSeconds > oneMinuteSeconds) {
+    return {
+      location: locationName,
+      status: "warn",
+      message: "No logs in the last minute",
+      lastLogAt: latestLog.createdAt,
+      timeSinceLastLogSeconds: timeDiffSeconds,
+    };
+  }
+
+  // 1分以内にログがある場合はok
+  return {
+    location: locationName,
+    status: "ok",
+    lastLogAt: latestLog.createdAt,
+    timeSinceLastLogSeconds: timeDiffSeconds,
+  };
+}
+
 const status = honoFactory.createApp();
 
 status
@@ -21,53 +83,7 @@ status
           orderBy: (logs, { desc }) => [desc(logs.createdAt)],
         });
 
-        // ログが存在しない場合
-        if (!latestLog) {
-          return {
-            location: location.name,
-            status: "error" as const,
-            message: "No logs found",
-          };
-        }
-
-        // 最新ログの時刻を取得し、現在時刻と比較
-        const latestLogTime = new Date(latestLog.createdAt);
-        const currentTime = new Date();
-        const timeDiffSeconds = Math.floor(
-          (currentTime.getTime() - latestLogTime.getTime()) / 1000,
-        );
-        const oneMinuteSeconds = 60;
-        const fiveMinutesSeconds = 5 * 60;
-
-        // 5分以上ログがない場合はerror
-        if (timeDiffSeconds > fiveMinutesSeconds) {
-          return {
-            location: location.name,
-            status: "error" as const,
-            message: "No logs in the last 5 minutes",
-            lastLogAt: latestLog.createdAt,
-            timeSinceLastLogSeconds: timeDiffSeconds,
-          };
-        }
-
-        // 1分以上ログがない場合はwarn
-        if (timeDiffSeconds > oneMinuteSeconds) {
-          return {
-            location: location.name,
-            status: "warn" as const,
-            message: "No logs in the last minute",
-            lastLogAt: latestLog.createdAt,
-            timeSinceLastLogSeconds: timeDiffSeconds,
-          };
-        }
-
-        // 1分以内にログがある場合はok
-        return {
-          location: location.name,
-          status: "ok" as const,
-          lastLogAt: latestLog.createdAt,
-          timeSinceLastLogSeconds: timeDiffSeconds,
-        };
+        return determineStatus(location.name, latestLog);
       }),
     );
 
@@ -92,53 +108,10 @@ status
       orderBy: (logs, { desc }) => [desc(logs.createdAt)],
     });
 
-    // ログが存在しない場合
-    if (!latestLog) {
-      return c.json({
-        location: locationName,
-        status: "error",
-        message: "No logs found",
-      });
-    }
-
-    // 最新ログの時刻を取得し、現在時刻と比較
-    const latestLogTime = new Date(latestLog.createdAt);
-    const currentTime = new Date();
-    const timeDiffSeconds = Math.floor(
-      (currentTime.getTime() - latestLogTime.getTime()) / 1000,
-    );
-    const oneMinuteSeconds = 60;
-    const fiveMinutesSeconds = 5 * 60;
-
-    // 5分以上ログがない場合はerror
-    if (timeDiffSeconds > fiveMinutesSeconds) {
-      return c.json({
-        location: locationName,
-        status: "error",
-        message: "No logs in the last 5 minutes",
-        lastLogAt: latestLog.createdAt,
-        timeSinceLastLogSeconds: timeDiffSeconds,
-      });
-    }
-
-    // 1分以上ログがない場合はwarn
-    if (timeDiffSeconds > oneMinuteSeconds) {
-      return c.json({
-        location: locationName,
-        status: "warn",
-        message: "No logs in the last minute",
-        lastLogAt: latestLog.createdAt,
-        timeSinceLastLogSeconds: timeDiffSeconds,
-      });
-    }
-
-    // 1分以内にログがある場合はok
-    return c.json({
-      location: locationName,
-      status: "ok",
-      lastLogAt: latestLog.createdAt,
-      timeSinceLastLogSeconds: timeDiffSeconds,
-    });
+    return c.json(determineStatus(locationName, latestLog));
   });
 
 export default status;
+
+
+

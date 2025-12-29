@@ -8,7 +8,7 @@ import status from "./status";
 
 interface StatusResponse {
   location: string;
-  status: "ok" | "warn" | "error";
+  status: "ok" | "warn" | "error" | "pending";
   message?: string;
   lastLogAt?: string;
   timeSinceLastLogSeconds?: number;
@@ -43,7 +43,7 @@ describe("Status API", () => {
         expect(json[0]).toHaveProperty("location");
         expect(json[0]).toHaveProperty("status");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(["ok", "warn", "error"]).toContain(json[0].status);
+        expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
       }
     });
 
@@ -120,8 +120,8 @@ describe("Status API", () => {
       expect(res.status).toBe(200);
       const json = await res.json();
       expect((json as StatusResponse).location).toBe(testLocationName);
-      expect((json as StatusResponse).status).toBe("error");
-      expect((json as StatusResponse).message).toBe("No logs found");
+      expect((json as StatusResponse).status).toBe("pending");
+      expect((json as StatusResponse).message).toBe("No logs recorded yet");
     });
 
     it("should return 404 for non-existent location", async () => {
