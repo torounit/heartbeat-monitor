@@ -11,7 +11,8 @@
     "migrate:remote": "wrangler d1 migrations apply heartbeat-monitor --remote",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "tsc": "npx tsc --noEmit"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
