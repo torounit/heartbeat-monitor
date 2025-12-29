@@ -1,32 +1,15 @@
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
-import type { Context } from "hono";
-import { Hono } from "hono";
-import { basicAuth } from "hono/basic-auth";
 import { z } from "zod";
 
 import * as schema from "../../db/schema";
+import honoFactory, { authMiddleware } from "../../services/honoFactory";
 
-const locations = new Hono<{ Bindings: CloudflareBindings }>();
+const locations = honoFactory.createApp();
 locations
-  .use(
-    "*",
-    basicAuth({
-      verifyUser: (
-        username,
-        password,
-        c: Context<{ Bindings: CloudflareBindings }>,
-      ) => {
-        return (
-          username === c.env.BASIC_AUTH_USERNAME &&
-          password === c.env.BASIC_AUTH_PASSWORD
-        );
-      },
-    }),
-  )
+  .use("*", authMiddleware)
   .get("/", async (c) => {
-    const db = drizzle(c.env.DB, { schema });
+    const db = c.get("db");
     const allLocations = await db.query.locations.findMany();
     return c.json(allLocations);
   })
@@ -40,7 +23,7 @@ locations
     ),
     async (c) => {
       const data = c.req.valid("json");
-      const db = drizzle(c.env.DB, { schema });
+      const db = c.get("db");
       const existingLocation = await db.query.locations.findFirst({
         where: eq(schema.locations.name, data.name),
       });
@@ -58,7 +41,7 @@ locations
   )
   .delete("/:name", async (c) => {
     const name = c.req.param("name");
-    const db = drizzle(c.env.DB, { schema });
+    const db = c.get("db");
     const deleteCount = await db
       .delete(schema.locations)
       .where(eq(schema.locations.name, name))

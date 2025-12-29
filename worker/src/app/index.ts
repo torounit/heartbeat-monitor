@@ -1,8 +1,7 @@
-import { Hono } from "hono";
-
+import honoFactory from "../services/honoFactory";
 import api from "./api";
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = honoFactory.createApp();
 app.route("/api", api);
 
 app.get("/", (c) => {

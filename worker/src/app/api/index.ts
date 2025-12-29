@@ -1,13 +1,13 @@
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { Hono } from "hono";
 import { z } from "zod";
 import * as schema from "../../db/schema";
+import honoFactory from "../../services/honoFactory";
 import locations from "./locations";
 import status from "./status";
 
-const api = new Hono<{ Bindings: CloudflareBindings }>();
+const api = honoFactory.createApp();
 
 api.route("/locations", locations);
 api.route("/status", status);
