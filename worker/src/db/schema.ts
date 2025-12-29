@@ -15,7 +15,7 @@ export const logs = sqliteTable("logs", {
     .notNull(),
   createdAt: text("created_at")
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`(strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))`),
 });
 
 export const locationsRelations = relations(locations, ({ many }) => ({

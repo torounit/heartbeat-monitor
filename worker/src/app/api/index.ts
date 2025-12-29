@@ -5,10 +5,12 @@ import { Hono } from "hono";
 import { z } from "zod";
 import * as schema from "../../db/schema";
 import locations from "./locations";
+import status from "./status";
 
 const api = new Hono<{ Bindings: CloudflareBindings }>();
 
 api.route("/locations", locations);
+api.route("/status", status);
 
 api.post(
   "/heartbeat",
