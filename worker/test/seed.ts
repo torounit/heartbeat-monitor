@@ -22,7 +22,7 @@ if (existingLocations.length === 0) {
   // Insert test data for logs
   if (insertedLocations.length > 0) {
     const locationId = insertedLocations[0].id;
-    await db.insert(schema.logs).values([
+    await db.insert(schema.heartbeats).values([
       { locationId, createdAt: "2025-01-01 00:00:00" },
       { locationId, createdAt: "2025-01-02 00:00:00" },
       { locationId, createdAt: "2025-01-03 00:00:00" },

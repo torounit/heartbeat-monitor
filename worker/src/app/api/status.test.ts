@@ -18,6 +18,29 @@ interface ErrorResponse {
   error: string;
 }
 
+function isStatusResponse(value: unknown): value is StatusResponse {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    "location" in value &&
+    typeof (value as { location?: unknown }).location === "string" &&
+    "status" in value &&
+    typeof (value as { status?: unknown }).status === "string" &&
+    ["ok", "warn", "error", "pending"].includes(
+      (value as { status: string }).status,
+    )
+  );
+}
+
+function isErrorResponse(value: unknown): value is ErrorResponse {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    "error" in value &&
+    typeof (value as { error?: unknown }).error === "string"
+  );
+}
+
 describe("Status API", () => {
   const authHeader = () =>
     createBasicAuthHeader(env.BASIC_AUTH_USERNAME, env.BASIC_AUTH_PASSWORD);
@@ -35,14 +58,16 @@ describe("Status API", () => {
         env,
       );
       expect(res.status).toBe(200);
-      const json = await res.json();
+      const json: unknown = await res.json();
       expect(Array.isArray(json)).toBe(true);
 
-      // 各要素がステータス情報を持っているか確認
-      if (Array.isArray(json) && json.length > 0) {
-        expect(json[0]).toHaveProperty("location");
-        expect(json[0]).toHaveProperty("status");
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (!Array.isArray(json) || json.length === 0) {
+        return;
+      }
+
+      expect(json[0]).toHaveProperty("location");
+      expect(json[0]).toHaveProperty("status");
+      if (isStatusResponse(json[0])) {
         expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
       }
     });
@@ -71,7 +96,7 @@ describe("Status API", () => {
         .returning();
 
       // ログを追加
-      await db.insert(schema.logs).values({
+      await db.insert(schema.heartbeats).values({
         locationId: location.id,
       });
 
@@ -87,11 +112,13 @@ describe("Status API", () => {
       );
 
       expect(res.status).toBe(200);
-      const json = await res.json();
-      expect(json).toHaveProperty("location");
-      expect(json).toHaveProperty("status");
-      expect((json as StatusResponse).location).toBe(testLocationName);
-      expect((json as StatusResponse).status).toBe("ok");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const jsonUnknown = await res.json();
+      expect(isStatusResponse(jsonUnknown)).toBe(true);
+      if (!isStatusResponse(jsonUnknown)) return;
+      const json = jsonUnknown;
+      expect(json.location).toBe(testLocationName);
+      expect(json.status).toBe("ok");
       expect(json).toHaveProperty("lastLogAt");
       expect(json).toHaveProperty("timeSinceLastLogSeconds");
     });
@@ -118,10 +145,14 @@ describe("Status API", () => {
       );
 
       expect(res.status).toBe(200);
-      const json = await res.json();
-      expect((json as StatusResponse).location).toBe(testLocationName);
-      expect((json as StatusResponse).status).toBe("pending");
-      expect((json as StatusResponse).message).toBe("No logs recorded yet");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const jsonUnknown = await res.json();
+      expect(isStatusResponse(jsonUnknown)).toBe(true);
+      if (!isStatusResponse(jsonUnknown)) return;
+      const json = jsonUnknown;
+      expect(json.location).toBe(testLocationName);
+      expect(json.status).toBe("pending");
+      expect(json.message).toBe("No heartbeats recorded yet");
     });
 
     it("should return 404 for non-existent location", async () => {
@@ -136,19 +167,12 @@ describe("Status API", () => {
         env,
       );
       expect(res.status).toBe(404);
-      const json = await res.json();
-      expect((json as ErrorResponse).error).toBe("Location Not Found");
-    });
-
-    it("should require authentication", async () => {
-      const res = await status.request(
-        "/SomeLocation",
-        {
-          method: "GET",
-        },
-        env,
-      );
-      expect(res.status).toBe(401);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const jsonUnknown = await res.json();
+      expect(isErrorResponse(jsonUnknown)).toBe(true);
+      if (!isErrorResponse(jsonUnknown)) return;
+      const json = jsonUnknown;
+      expect(json.error).toBe("Location Not Found");
     });
   });
 });

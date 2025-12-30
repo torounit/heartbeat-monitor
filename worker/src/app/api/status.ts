@@ -1,7 +1,7 @@
 import type * as schema from "../../db/schema";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
 import { getLocationByName, getLocations } from "../../services/locations";
-import { getLatestLogByLocationId } from "../../services/logs";
+import { getLatestHeartbeatByLocationId } from "../../services/heartbeats";
 
 interface StatusInfo {
   location: string;
@@ -16,17 +16,17 @@ interface StatusInfo {
  */
 function determineStatus(
   locationName: string,
-  latestLog: typeof schema.logs.$inferSelect | undefined | null,
+  latestHeartbeat: typeof schema.heartbeats.$inferSelect | undefined | null,
 ): StatusInfo {
-  if (!latestLog) {
+  if (!latestHeartbeat) {
     return {
       location: locationName,
       status: "pending",
-      message: "No logs recorded yet",
+      message: "No heartbeats recorded yet",
     };
   }
 
-  const latestLogTime = new Date(latestLog.createdAt);
+  const latestLogTime = new Date(latestHeartbeat.createdAt);
   const currentTime = new Date();
   const timeDiffSeconds = Math.floor(
     (currentTime.getTime() - latestLogTime.getTime()) / 1000,
@@ -39,8 +39,8 @@ function determineStatus(
     return {
       location: locationName,
       status: "error",
-      message: "No logs in the last 5 minutes",
-      lastLogAt: latestLog.createdAt,
+      message: "No heartbeats in the last 5 minutes",
+      lastLogAt: latestHeartbeat.createdAt,
       timeSinceLastLogSeconds: timeDiffSeconds,
     };
   }
@@ -50,8 +50,8 @@ function determineStatus(
     return {
       location: locationName,
       status: "warn",
-      message: "No logs in the last minute",
-      lastLogAt: latestLog.createdAt,
+      message: "No heartbeats in the last minute",
+      lastLogAt: latestHeartbeat.createdAt,
       timeSinceLastLogSeconds: timeDiffSeconds,
     };
   }
@@ -60,7 +60,7 @@ function determineStatus(
   return {
     location: locationName,
     status: "ok",
-    lastLogAt: latestLog.createdAt,
+    lastLogAt: latestHeartbeat.createdAt,
     timeSinceLastLogSeconds: timeDiffSeconds,
   };
 }
@@ -78,8 +78,11 @@ status
     // 各locationのステータスを取得
     const statuses = await Promise.all(
       locations.map(async (location) => {
-        const latestLog = await getLatestLogByLocationId(db, location.id);
-        return determineStatus(location.name, latestLog ?? null);
+        const latestHeartbeat = await getLatestHeartbeatByLocationId(
+          db,
+          location.id,
+        );
+        return determineStatus(location.name, latestHeartbeat ?? null);
       }),
     );
 
@@ -95,9 +98,12 @@ status
       return c.json({ error: "Location Not Found" }, 404);
     }
 
-    const latestLog = await getLatestLogByLocationId(db, location.id);
+    const latestHeartbeat = await getLatestHeartbeatByLocationId(
+      db,
+      location.id,
+    );
 
-    return c.json(determineStatus(locationName, latestLog ?? null));
+    return c.json(determineStatus(locationName, latestHeartbeat ?? null));
   });
 
 export default status;

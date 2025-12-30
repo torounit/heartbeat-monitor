@@ -30,7 +30,7 @@ api.post(
     if (!location) {
       return c.json({ status: "Location Not Found" }, 404);
     }
-    await db.insert(schema.logs).values({
+    await db.insert(schema.heartbeats).values({
       locationId: location.id,
     });
 

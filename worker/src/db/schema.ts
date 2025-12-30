@@ -6,7 +6,7 @@ export const locations = sqliteTable("locations", {
   name: text().notNull().unique(),
 });
 
-export const logs = sqliteTable("logs", {
+export const heartbeats = sqliteTable("heartbeats", {
   id: int().primaryKey({ autoIncrement: true }),
   locationId: int("location_id")
     .references(() => locations.id, {
@@ -19,12 +19,12 @@ export const logs = sqliteTable("logs", {
 });
 
 export const locationsRelations = relations(locations, ({ many }) => ({
-  logs: many(logs),
+  heartbeats: many(heartbeats),
 }));
 
-export const logsRelations = relations(logs, ({ one }) => ({
+export const heartbeatsRelations = relations(heartbeats, ({ one }) => ({
   location: one(locations, {
-    fields: [logs.locationId],
+    fields: [heartbeats.locationId],
     references: [locations.id],
   }),
 }));
