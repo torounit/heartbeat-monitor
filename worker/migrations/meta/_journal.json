@@ -71,6 +71,13 @@
       "when": 1767035527634,
       "tag": "0009_adorable_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1767100976686,
+      "tag": "0010_chubby_master_mold",
+      "breakpoints": true
     }
   ]
 }

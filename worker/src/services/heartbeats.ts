@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 
 import * as schema from "../db/schema";
+import type { status } from "../types";
 import { getLocationByName } from "./locations";
 
 type DB = DrizzleD1Database<typeof schema>;
@@ -21,7 +22,7 @@ export async function getLatestHeartbeatByLocationId(
 
 export interface HeartbeatStatus {
   location: string;
-  status: "ok" | "warn" | "error" | "pending";
+  status: status;
   lastLogAt: string;
 }
 
