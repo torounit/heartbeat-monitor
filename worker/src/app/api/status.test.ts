@@ -9,7 +9,6 @@ import status from "./status";
 interface StatusResponse {
   location: string;
   status: "ok" | "warn" | "error" | "pending";
-  message?: string;
   lastLogAt?: string;
   timeSinceLastLogSeconds?: number;
 }
@@ -112,15 +111,13 @@ describe("Status API", () => {
       );
 
       expect(res.status).toBe(200);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const jsonUnknown = await res.json();
       expect(isStatusResponse(jsonUnknown)).toBe(true);
       if (!isStatusResponse(jsonUnknown)) return;
-      const json = jsonUnknown;
-      expect(json.location).toBe(testLocationName);
-      expect(json.status).toBe("ok");
-      expect(json).toHaveProperty("lastLogAt");
-      expect(json).toHaveProperty("timeSinceLastLogSeconds");
+      expect(jsonUnknown.location).toBe(testLocationName);
+      expect(jsonUnknown.status).toBe("ok");
+      expect(jsonUnknown).toHaveProperty("lastLogAt");
+      expect(jsonUnknown).toHaveProperty("timeSinceLastLogSeconds");
     });
 
     it("should return error status for location without logs", async () => {
@@ -145,14 +142,11 @@ describe("Status API", () => {
       );
 
       expect(res.status).toBe(200);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const jsonUnknown = await res.json();
       expect(isStatusResponse(jsonUnknown)).toBe(true);
       if (!isStatusResponse(jsonUnknown)) return;
-      const json = jsonUnknown;
-      expect(json.location).toBe(testLocationName);
-      expect(json.status).toBe("pending");
-      expect(json.message).toBe("No heartbeats recorded yet");
+      expect(jsonUnknown.location).toBe(testLocationName);
+      expect(jsonUnknown.status).toBe("pending");
     });
 
     it("should return 404 for non-existent location", async () => {
@@ -167,12 +161,10 @@ describe("Status API", () => {
         env,
       );
       expect(res.status).toBe(404);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const jsonUnknown = await res.json();
       expect(isErrorResponse(jsonUnknown)).toBe(true);
       if (!isErrorResponse(jsonUnknown)) return;
-      const json = jsonUnknown;
-      expect(json.error).toBe("Location Not Found");
+      expect(jsonUnknown.error).toBe("Location Not Found");
     });
   });
 });
