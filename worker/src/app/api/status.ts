@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
-import * as schema from "../../db/schema";
+import type * as schema from "../../db/schema";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
+import { getLocationByName, getLocations } from "../../services/locations";
+import { getLatestLogByLocationId } from "../../services/logs";
 
 interface StatusInfo {
   location: string;
@@ -15,7 +16,7 @@ interface StatusInfo {
  */
 function determineStatus(
   locationName: string,
-  latestLog: (typeof schema.logs.$inferSelect) | undefined | null,
+  latestLog: typeof schema.logs.$inferSelect | undefined | null,
 ): StatusInfo {
   if (!latestLog) {
     return {
@@ -72,18 +73,13 @@ status
     const db = c.get("db");
 
     // 全てのlocationを取得
-    const locations = await db.query.locations.findMany();
+    const locations = await getLocations(db);
 
     // 各locationのステータスを取得
     const statuses = await Promise.all(
       locations.map(async (location) => {
-        // 最新のログを取得
-        const latestLog = await db.query.logs.findFirst({
-          where: eq(schema.logs.locationId, location.id),
-          orderBy: (logs, { desc }) => [desc(logs.createdAt)],
-        });
-
-        return determineStatus(location.name, latestLog);
+        const latestLog = await getLatestLogByLocationId(db, location.id);
+        return determineStatus(location.name, latestLog ?? null);
       }),
     );
 
@@ -93,25 +89,15 @@ status
     const locationName = c.req.param("location");
     const db = c.get("db");
 
-    // locationを取得
-    const location = await db.query.locations.findFirst({
-      where: eq(schema.locations.name, locationName),
-    });
+    const location = await getLocationByName(db, locationName);
 
     if (!location) {
       return c.json({ error: "Location Not Found" }, 404);
     }
 
-    // 最新のログを取得
-    const latestLog = await db.query.logs.findFirst({
-      where: eq(schema.logs.locationId, location.id),
-      orderBy: (logs, { desc }) => [desc(logs.createdAt)],
-    });
+    const latestLog = await getLatestLogByLocationId(db, location.id);
 
-    return c.json(determineStatus(locationName, latestLog));
+    return c.json(determineStatus(locationName, latestLog ?? null));
   });
 
 export default status;
-
-
-
