@@ -1,3 +1,4 @@
+import type { Env } from "../services/honoFactory";
 import honoFactory from "../services/honoFactory";
 import api from "./api";
 
@@ -10,4 +11,10 @@ app.get("/", (c) => {
   return c.json({ status: "ok" });
 });
 
-export default app;
+const scheduled: ExportedHandlerScheduledHandler<Env> = async () => {};
+
+export default {
+  fetch: app.fetch,
+  request: app.request,
+  scheduled,
+};

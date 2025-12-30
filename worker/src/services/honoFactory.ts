@@ -4,7 +4,7 @@ import { basicAuth } from "hono/basic-auth";
 import { createFactory, createMiddleware } from "hono/factory";
 import * as schema from "../db/schema";
 
-interface Env {
+export interface Env {
   Bindings: CloudflareBindings;
   Variables: { db: DrizzleD1Database<typeof schema> };
 }
