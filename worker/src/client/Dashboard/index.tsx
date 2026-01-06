@@ -33,7 +33,7 @@ function Status({
     <table class="table">
       <thead>
         <tr>
-          <th>SSID</th>
+          <th>名称</th>
           <th>ステータス</th>
           <th>最終ログ日時</th>
           <th>最終ログからの経過時間（秒）</th>

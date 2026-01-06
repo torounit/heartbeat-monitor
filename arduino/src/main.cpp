@@ -94,7 +94,7 @@ void sendHeartbeat() {
 
   Serial.println("Sending heartbeat check...");
   char json[128];
-  sprintf(json, "{\"location\":\"%s\"}", WIFI_SSID);
+  sprintf(json, "{\"location\":\"%s\"}", LOCATION_NAME);
   httpClient.post("/api/heartbeat", "application/json", json);
 
   int statusCode = httpClient.responseStatusCode();
