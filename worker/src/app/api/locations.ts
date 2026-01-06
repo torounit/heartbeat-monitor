@@ -5,8 +5,8 @@ import { z } from "zod";
 import * as schema from "../../db/schema";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
 
-const locations = honoFactory.createApp();
-locations
+const locations = honoFactory
+  .createApp()
   .use("*", authMiddleware)
   .get("/", async (c) => {
     const db = c.get("db");

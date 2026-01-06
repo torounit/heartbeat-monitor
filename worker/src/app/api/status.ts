@@ -39,9 +39,8 @@ function enrichStatus(baseStatus: {
   };
 }
 
-const status = honoFactory.createApp();
-
-status
+const status = honoFactory
+  .createApp()
   .use("*", authMiddleware)
   .get("/", async (c) => {
     const db = c.get("db");

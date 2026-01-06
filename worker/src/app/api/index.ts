@@ -7,34 +7,34 @@ import honoFactory from "../../services/honoFactory";
 import locations from "./locations";
 import status from "./status";
 
-const api = honoFactory.createApp();
+const api = honoFactory
+  .createApp()
+  .route("/locations", locations)
+  .route("/status", status)
+  .post(
+    "/heartbeat",
+    zValidator(
+      "json",
+      z.object({
+        location: z.string(),
+      }),
+    ),
+    async (c) => {
+      const data = c.req.valid("json");
+      const db = drizzle(c.env.DB, { schema });
+      const location = await db.query.locations.findFirst({
+        where: eq(schema.locations.name, data.location),
+      });
 
-api.route("/locations", locations);
-api.route("/status", status);
+      if (!location) {
+        return c.json({ status: "Location Not Found" }, 404);
+      }
+      await db.insert(schema.heartbeats).values({
+        locationId: location.id,
+      });
 
-api.post(
-  "/heartbeat",
-  zValidator(
-    "json",
-    z.object({
-      location: z.string(),
-    }),
-  ),
-  async (c) => {
-    const data = c.req.valid("json");
-    const db = drizzle(c.env.DB, { schema });
-    const location = await db.query.locations.findFirst({
-      where: eq(schema.locations.name, data.location),
-    });
+      return c.json({ status: "Heartbeat Logged" }, 201);
+    },
+  );
 
-    if (!location) {
-      return c.json({ status: "Location Not Found" }, 404);
-    }
-    await db.insert(schema.heartbeats).values({
-      locationId: location.id,
-    });
-
-    return c.json({ status: "Heartbeat Logged" }, 201);
-  },
-);
 export default api;

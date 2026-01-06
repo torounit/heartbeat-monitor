@@ -5,15 +5,15 @@ import { updateAllLocationsReports } from "../services/reports";
 import api from "./api";
 import dashboard from "./dashboard";
 
-const app = honoFactory.createApp();
-app.route("/api", api);
-app.route("/dashboard", dashboard);
-
-app.get("/", (c) => {
-  const location = c.req.header("x-location");
-  console.log(location);
-  return c.json({ status: "ok" });
-});
+const app = honoFactory
+  .createApp()
+  .route("/api", api)
+  .route("/dashboard", dashboard)
+  .get("/", (c) => {
+    const location = c.req.header("x-location");
+    console.log(location);
+    return c.json({ status: "ok" });
+  });
 
 const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
   event,
