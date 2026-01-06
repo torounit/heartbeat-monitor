@@ -1,6 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 
+import { heartbeatConfig } from "../config";
 import * as schema from "../db/schema";
 import type { status } from "../types";
 import { getLocationByName } from "./locations";
@@ -47,7 +48,7 @@ export async function getHeartbeatStatus(
   const now = new Date();
   const diffSeconds = Math.floor((now.getTime() - latestTime.getTime()) / 1000);
 
-  if (diffSeconds > 5 * 60) {
+  if (diffSeconds > heartbeatConfig.errorThresholdMinutes * 60) {
     return {
       location: locationName,
       status: "error",
@@ -55,7 +56,7 @@ export async function getHeartbeatStatus(
     };
   }
 
-  if (diffSeconds > 60) {
+  if (diffSeconds > heartbeatConfig.warnThresholdMinutes * 60) {
     return {
       location: locationName,
       status: "warn",

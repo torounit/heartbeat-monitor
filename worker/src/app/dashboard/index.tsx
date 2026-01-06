@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import type { FC } from "hono/jsx";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
 
 const app = honoFactory
