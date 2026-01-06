@@ -5,10 +5,13 @@
 #include "secrets.h"
 #include "led_matrix.h"
 
-// WiFi client
 WiFiSSLClient wifiSSLClient;
 HttpClient httpClient = HttpClient(wifiSSLClient, WORKER_HOSTNAME, 443);
 
+/**
+ * @enum
+ * システムの状態を表す列挙型。
+ */
 enum State {
   STATE_STARTUP,           // 起動中
   STATE_CONNECTING,      // WiFi接続試行中
@@ -18,6 +21,11 @@ enum State {
 
 State currentState = STATE_STARTUP;
 
+/**
+ * @fn
+ * 状態を変更し、対応するLED表示を更新する。
+ * @param newState 新しい状態
+ */
 void setState(State newState) {
 
   if (currentState == newState) {
@@ -39,9 +47,11 @@ void setState(State newState) {
   }
 }
 
-
-
-// WiFi接続処理
+/**
+ * @fn
+ * WiFiに接続する。
+ * タイムアウト設定付きで、接続状態を管理する。
+ */
 void connectWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("WiFi already connected");
@@ -73,7 +83,10 @@ void connectWiFi() {
   }
 }
 
-// Workerへのハートビート送信
+/**
+ * @fn
+ * Workerエンドポイントにハートビートチェックを送信する。
+ */
 void sendHeartbeat() {
   if (WiFi.status() != WL_CONNECTED) {
     return;
@@ -101,6 +114,10 @@ void sendHeartbeat() {
   }
 }
 
+/**
+ * @fn
+ * Arduinoのセットアップ関数。
+ */
 void setup() {
   Serial.begin(115200);
   delay(1000);
@@ -110,16 +127,16 @@ void setup() {
   setState(STATE_CONNECTING);
 }
 
+/**
+ * @fn
+ * Arduinoのメインループ関数。
+ */
 void loop() {
-
-
-  // Check WiFi connection status
   if (WiFi.status() != WL_CONNECTED) {
     connectWiFi();
+    delay(WIFI_RECONNECT_INTERVAL_SECONDS * 1000);
   } else {
-    // WiFi connected, send heartbeat check
     sendHeartbeat();
+    delay(HEARTBEAT_INTERVAL_SECONDS * 1000);
   }
-
-  delay(10000); // Wait 10 seconds before next attempt
 }
