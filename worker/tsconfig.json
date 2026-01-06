@@ -5,8 +5,8 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
-    "lib": ["ESNext"],
-    "types": ["@cloudflare/vitest-pool-workers"],
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["@cloudflare/vitest-pool-workers", "vite/client"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }
