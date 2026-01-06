@@ -1,3 +1,4 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import build from "@hono/vite-build/node";
 import devServer from "@hono/vite-dev-server";
 import cloudflareAdapter from "@hono/vite-dev-server/cloudflare";
@@ -11,9 +12,9 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         rollupOptions: {
-          input: "./src/client/index.tsx",
+          input: "./src/client.tsx",
           output: {
-            entryFileNames: "static/client/index.js",
+            entryFileNames: "static/client.js",
           },
         },
       },
