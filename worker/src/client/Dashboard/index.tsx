@@ -17,20 +17,20 @@ function Status({
 }) {
   const status = use(statusPromise);
   return (
-    <table>
+    <table class="table">
       <thead>
         <tr>
-          <th>Location</th>
-          <th>Status</th>
-          <th>Last Log At</th>
-          <th>Time Since Last Log (seconds)</th>
+          <th>SSID</th>
+          <th>ステータス</th>
+          <th>最終ログ日時</th>
+          <th>最終ログからの経過時間（秒）</th>
         </tr>
       </thead>
       <tbody>
         {status.map((s) => (
           <tr key={s.location}>
             <td>{s.location}</td>
-            <td>{s.status}</td>
+            <td class={s.status === "ok" ? "text-success" : "text-danger"}>{s.status}</td>
             <td>{new Date(s.lastLogAt).toLocaleString()}</td>
             <td>{s.timeSinceLastLogSeconds ?? "N/A"}</td>
           </tr>
@@ -42,13 +42,13 @@ function Status({
 
 function Dashboard() {
   return (
-    <>
-      <h1>Heartbeat Monitor</h1>
+    <div class="container mt-4 mb-4">
+      <h1 class="mb-4">Heartbeat Monitor</h1>
       <h2>Status</h2>
       <Suspense fallback={<p>Loading...</p>}>
         <Status statusPromise={fetchStatus()} />
       </Suspense>
-    </>
+    </div>
   );
 }
 
