@@ -10,6 +10,19 @@ async function fetchStatus() {
   return res.json();
 }
 
+function getStatusClass(status: string): string {
+  switch (status) {
+    case "ok":
+      return "table-success";
+    case "error":
+      return "table-danger";
+    case "warn":
+      return "table-warning";
+    default:
+      return "table-light";
+  }
+}
+
 function Status({
   statusPromise,
 }: {
@@ -28,9 +41,9 @@ function Status({
       </thead>
       <tbody>
         {status.map((s) => (
-          <tr key={s.location}>
+          <tr key={s.location} class={getStatusClass(s.status)}>
             <td>{s.location}</td>
-            <td class={s.status === "ok" ? "text-success" : "text-danger"}>{s.status}</td>
+            <td>{s.status}</td>
             <td>{new Date(s.lastLogAt).toLocaleString()}</td>
             <td>{s.timeSinceLastLogSeconds ?? "N/A"}</td>
           </tr>
