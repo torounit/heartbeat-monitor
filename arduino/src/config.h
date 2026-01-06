@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // Worker endpoint for heartbeat check
-const char* WORKER_HOSTNAME = "heartbeat-monitor.torounit.workers.dev";
+const char* WORKER_HOSTNAME = "heartbeat-monitor.sweetwork.workers.dev";
 
 // WiFi connection timeout in seconds
 const unsigned long WIFI_TIMEOUT_SECONDS = 10;

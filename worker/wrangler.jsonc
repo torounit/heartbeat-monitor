@@ -23,7 +23,7 @@
     {
       "binding": "DB",
       "database_name": "heartbeat-monitor",
-      "database_id": "9535b33c-3f64-466b-b5a2-c4a1fc9f4b83",
+      "database_id": "62fbd075-319f-4be8-bfef-13006e04c24a",
     },
   ],
   "triggers": {
