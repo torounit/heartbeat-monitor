@@ -21,7 +21,7 @@ function Dashboard() {
     void fetchStatus();
   }, []);
 
-  return <h1>Heartbeat Monitor Dashboard</h1>;
+  return <h1>Heartbeat Monitor</h1>;
 }
 
 export default Dashboard;

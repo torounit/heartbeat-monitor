@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import type { FC } from "hono/jsx";
 import honoFactory, { authMiddleware } from "../../services/honoFactory";
 
@@ -6,7 +7,7 @@ const app = honoFactory
   .use("*", authMiddleware)
   .get("/", (c) => {
     return c.html(
-      <html lang="en">
+      <html lang="ja">
         <head>
           <meta charSet="utf-8" />
           <meta content="width=device-width, initial-scale=1" name="viewport" />
@@ -14,10 +15,10 @@ const app = honoFactory
             rel="stylesheet"
             href="https://cdn.simplecss.org/simple.min.css"
           />
-          {import.meta?.env?.DEV ? (
-            <script type="module" src="/src/client.tsx" />
+          {import.meta.env?.DEV ? (
+            <script type="module" src="/src/client.tsx"></script>
           ) : (
-            <script type="module" src="static/client.js" />
+            <script type="module" src="/static/client.js"></script>
           )}
         </head>
         <body>
