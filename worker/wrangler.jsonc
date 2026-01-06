@@ -8,26 +8,24 @@
       "enabled": true,
       "head_sampling_rate": 1,
       "invocation_logs": true,
-      "persist": true
+      "persist": true,
     },
     "traces": {
       "enabled": false,
       "persist": true,
-      "head_sampling_rate": 1
-    }
+      "head_sampling_rate": 1,
+    },
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "heartbeat-monitor",
-      "database_id": "9535b33c-3f64-466b-b5a2-c4a1fc9f4b83"
-    }
+      "database_id": "9535b33c-3f64-466b-b5a2-c4a1fc9f4b83",
+    },
   ],
   "triggers": {
-    "crons": [
-      "*/1 * * * *"
-    ]
-  }
+    "crons": ["*/1 * * * *"],
+  },
   // "compatibility_flags": [
   //   "nodejs_compat"
   // ],

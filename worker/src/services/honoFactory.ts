@@ -1,12 +1,12 @@
-import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { drizzle } from "drizzle-orm/d1";
 import { basicAuth } from "hono/basic-auth";
 import { createFactory, createMiddleware } from "hono/factory";
 import * as schema from "../db/schema";
+import type { DB } from "../types";
 
 export interface Env {
   Bindings: CloudflareBindings;
-  Variables: { db: DrizzleD1Database<typeof schema> };
+  Variables: { db: DB };
 }
 
 const factory = createFactory<Env>({
