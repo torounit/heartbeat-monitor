@@ -10,5 +10,5 @@ export const heartbeatConfig = {
   /**
    * 警告と判定する経過時間（分）
    */
-  warnThresholdMinutes: 3,
+  warnThresholdMinutes: 1,
 };
