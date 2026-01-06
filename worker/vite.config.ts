@@ -1,4 +1,3 @@
-import { cloudflare } from "@cloudflare/vite-plugin";
 import build from "@hono/vite-build/node";
 import devServer from "@hono/vite-dev-server";
 import cloudflareAdapter from "@hono/vite-dev-server/cloudflare";
