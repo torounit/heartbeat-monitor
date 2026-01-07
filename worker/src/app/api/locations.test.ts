@@ -36,11 +36,11 @@ describe("Locations API", () => {
     });
   });
 
-  describe("POST /register", () => {
+  describe("POST /", () => {
     it("should register a new location", async () => {
       const uniqueName = `Test Location ${String(Date.now())}`;
       const res = await locations.request(
-        "/register",
+        "/",
         {
           method: "POST",
           headers: new Headers({
@@ -61,7 +61,7 @@ describe("Locations API", () => {
 
       // 最初の登録
       await locations.request(
-        "/register",
+        "/",
         {
           method: "POST",
           headers: new Headers({
@@ -75,7 +75,7 @@ describe("Locations API", () => {
 
       // 2回目の登録（重複）
       const res = await locations.request(
-        "/register",
+        "/",
         {
           method: "POST",
           headers: new Headers({
@@ -93,7 +93,7 @@ describe("Locations API", () => {
 
     it("should require authentication", async () => {
       const res = await locations.request(
-        "/register",
+        "/",
         {
           method: "POST",
           headers: new Headers({
@@ -113,7 +113,7 @@ describe("Locations API", () => {
 
       // まず location を登録
       await locations.request(
-        "/register",
+        "/",
         {
           method: "POST",
           headers: new Headers({

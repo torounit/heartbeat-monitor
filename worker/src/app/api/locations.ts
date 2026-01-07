@@ -26,7 +26,7 @@ const locations = honoFactory
     return c.json(reportsList);
   })
   .post(
-    "/register",
+    "/",
     zValidator(
       "json",
       z.object({
