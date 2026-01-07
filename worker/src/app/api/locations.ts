@@ -13,6 +13,16 @@ const locations = honoFactory
     const allLocations = await db.query.locations.findMany();
     return c.json(allLocations);
   })
+  .get("/reports", async (c) => {
+    const db = c.get("db");
+    const reportsList = await db.query.locations.findMany({
+      with: {
+        reports: true,
+      },
+    });
+
+    return c.json(reportsList);
+  })
   .post(
     "/register",
     zValidator(

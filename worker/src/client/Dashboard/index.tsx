@@ -54,23 +54,22 @@ function Status({
 }
 
 async function fetchReports() {
-  const res = await client.api.reports.$get();
+  const res = await client.api.locations.reports.$get();
   return res.json();
 }
 
-function Reports({
-  reportsPromise,
-}: {
-  reportsPromise: Promise<InferResponseType<typeof client.api.reports.$get>>;
-}) {
-  const reports = use(reportsPromise);
-  const groupedReports = Map.groupBy(reports, (report) => report.location.name);
 
+function Reports({
+  locationReportsPromise,
+}: {
+  locationReportsPromise: Promise<InferResponseType<typeof client.api.locations.reports.$get>>;
+}) {
+  const locations = use(locationReportsPromise);
   return (
     <div>
-      {Array.from(groupedReports.entries()).map(([location, reports]) => (
-        <div key={location} class="mb-4">
-          <h3>{location}</h3>
+      {locations.map(({ name, reports }) => (
+        <div key={name} class="mb-4">
+          <h3>{name}</h3>
           <table class="table">
             <thead>
               <tr>
@@ -104,7 +103,7 @@ function Dashboard() {
 
       <h2 class="mt-5">Reports</h2>
       <Suspense fallback={<p>Loading...</p>}>
-        <Reports reportsPromise={fetchReports()} />
+        <Reports locationReportsPromise={fetchReports()} />
       </Suspense>
     </div>
   );
