@@ -5,11 +5,13 @@ import { z } from "zod";
 import * as schema from "../../db/schema";
 import honoFactory from "../../services/honoFactory";
 import locations from "./locations";
+import reports from "./reports";
 import status from "./status";
 
 const api = honoFactory
   .createApp()
   .route("/locations", locations)
+  .route("/reports", reports)
   .route("/status", status)
   .post(
     "/heartbeat",
