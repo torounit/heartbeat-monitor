@@ -17,7 +17,9 @@ const locations = honoFactory
     const db = c.get("db");
     const reportsList = await db.query.locations.findMany({
       with: {
-        reports: true,
+        reports: {
+          orderBy: [eq(schema.reports.createdAt, "desc")],
+        }
       },
     });
 
