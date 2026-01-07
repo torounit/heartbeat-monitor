@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
+import { sendStatusChangeNotification } from "../services/discord";
 import honoFactory from "../services/honoFactory";
 import { updateAllLocationsReports } from "../services/reports";
 import api from "./api";
@@ -24,43 +25,9 @@ const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
     (async () => {
       const db = drizzle(env.DB, { schema });
       await updateAllLocationsReports(db, async ({ location, newStatus }) => {
-        const colors = {
-          ok: 0x00ff00,
-          warn: 0xffff00,
-          error: 0xff0000,
-          pending: 0x808080,
-        } as const;
-
         const webhookUrl = env.DISCORD_WEBHOOK_URL;
         if (webhookUrl) {
-          await fetch(webhookUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              embeds: [
-                {
-                  title: "Heartbeat Monitor - Status Update",
-                  description: "S",
-                  color: colors[newStatus],
-                  fields: [
-                    {
-                      name: "Location",
-                      value: location.name,
-                      inline: true,
-                    },
-                    {
-                      name: "Status",
-                      value: newStatus,
-                      inline: true,
-                    },
-                  ],
-                  timestamp: new Date().toISOString(),
-                },
-              ],
-            }),
-          });
+          await sendStatusChangeNotification(webhookUrl, location, newStatus);
         }
       });
     })(),
