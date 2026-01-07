@@ -11,6 +11,10 @@ interface ReportResponse {
   locationId: number;
   status: "ok" | "warn" | "error" | "pending";
   createdAt: string;
+  location: {
+    id: number;
+    name: string;
+  };
 }
 
 interface ErrorResponse {
@@ -31,7 +35,9 @@ function isReportResponse(value: unknown): value is ReportResponse {
       (value as { status: string }).status,
     ) &&
     "createdAt" in value &&
-    typeof (value as { createdAt?: unknown }).createdAt === "string"
+    typeof (value as { createdAt?: unknown }).createdAt === "string" &&
+    "location" in value &&
+    typeof (value as { location?: unknown }).location === "object"
   );
 }
 
@@ -47,6 +53,50 @@ function isErrorResponse(value: unknown): value is ErrorResponse {
 describe("Reports API", () => {
   const authHeader = () =>
     createBasicAuthHeader(env.BASIC_AUTH_USERNAME, env.BASIC_AUTH_PASSWORD);
+
+  describe("GET /", () => {
+    it("should return all reports", async () => {
+      const res = await reports.request(
+        "/",
+        {
+          method: "GET",
+          headers: new Headers({
+            Authorization: authHeader(),
+          }),
+        },
+        env,
+      );
+      expect(res.status).toBe(200);
+      const json: unknown = await res.json();
+      expect(Array.isArray(json)).toBe(true);
+
+      if (!Array.isArray(json) || json.length === 0) {
+        return;
+      }
+
+      expect(json[0]).toHaveProperty("id");
+      expect(json[0]).toHaveProperty("locationId");
+      expect(json[0]).toHaveProperty("status");
+      expect(json[0]).toHaveProperty("createdAt");
+      expect(json[0]).toHaveProperty("location");
+      if (isReportResponse(json[0])) {
+        expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
+        expect(json[0].location).toHaveProperty("id");
+        expect(json[0].location).toHaveProperty("name");
+      }
+    });
+
+    it("should require authentication", async () => {
+      const res = await reports.request(
+        "/",
+        {
+          method: "GET",
+        },
+        env,
+      );
+      expect(res.status).toBe(401);
+    });
+  });
 
   describe("GET /:location", () => {
     it("should return reports for a specific location", async () => {
@@ -102,6 +152,8 @@ describe("Reports API", () => {
       if (!isReportResponse(jsonUnknown[0])) return;
       expect(jsonUnknown[0].locationId).toBe(location.id);
       expect(jsonUnknown[0].status).toBe("ok");
+      expect(jsonUnknown[0].location.id).toBe(location.id);
+      expect(jsonUnknown[0].location.name).toBe(testLocationName);
 
       // 降順でソートされていることを確認
       expect(jsonUnknown.length).toBe(3);
