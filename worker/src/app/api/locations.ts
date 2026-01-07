@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import * as schema from "../../db/schema";
@@ -18,8 +18,8 @@ const locations = honoFactory
     const reportsList = await db.query.locations.findMany({
       with: {
         reports: {
-          orderBy: [eq(schema.reports.createdAt, "desc")],
-        }
+          orderBy: [desc(schema.reports.createdAt)],
+        },
       },
     });
 
