@@ -5,7 +5,7 @@ import * as schema from "../db/schema";
 
 type DB = DrizzleD1Database<typeof schema>;
 
-type Location = typeof schema.locations.$inferSelect;
+export type Location = typeof schema.locations.$inferSelect;
 
 // 全てのlocationを取得
 export async function getLocations(db: DB): Promise<Location[]> {
