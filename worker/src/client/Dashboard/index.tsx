@@ -71,13 +71,22 @@ function Reports({
       {Array.from(groupedReports.entries()).map(([location, reports]) => (
         <div key={location} class="mb-4">
           <h3>{location}</h3>
-          <ul>
-            {reports.map((report) => (
-              <li key={report.id}>
-                {new Date(report.createdAt).toLocaleString()}: {report.status}
-              </li>
-            ))}
-          </ul>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>ステータス</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((report) => (
+                <tr key={report.id} class={getStatusClass(report.status)}>
+                  <td>{new Date(report.createdAt).toLocaleString()}</td>
+                  <td>{report.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ))}
     </div>
