@@ -35,7 +35,7 @@ Arduino UNO R4 WiFi と Cloudflare Workers を使用したハートビートモ�
 
 - **Backend**: Cloudflare Workers + Hono v4 + Drizzle ORM
 - **Database**: Cloudflare D1 (SQLite)
-- **Frontend**: Hono JSX + Vite + Bootstrap 5
+- **Frontend**: Hono JSX + Vite + Tailwind CSS
 - **Device**: Arduino UNO R4 WiFi (PlatformIO)
 
 ## 使い方
@@ -81,7 +81,6 @@ npm run deploy
 ```bash
 curl -X POST https://your-worker.workers.dev/api/locations/ \
   -H "Content-Type: application/json" \
-  -H "Authorization: Basic $(echo -n 'username:password' | base64)" \
   -d '{"name": "Arduino-Device-1"}'
 ```
 
@@ -116,9 +115,9 @@ cp src/secrets.h.sample src/secrets.h
 # - WORKER_HOSTNAME: Workers のホスト名（例: your-worker.workers.dev）
 # - WIFI_SSID: WiFi SSID
 # - WIFI_PASSWORD: WiFi パスワード
-# - BASIC_AUTH_USERNAME: Basic認証のユーザー名
-# - BASIC_AUTH_PASSWORD: Basic認証のパスワード
 # - LOCATION_NAME: このデバイスのlocation名
+# - CF_ACCESS_CLIENT_ID: Cloudflare Access クライアントID（オプション）
+# - CF_ACCESS_CLIENT_SECRET: Cloudflare Access クライアントシークレット（オプション）
 
 # PlatformIO でビルド＆アップロード
 pio run --target upload
