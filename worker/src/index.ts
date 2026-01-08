@@ -3,7 +3,6 @@ import app from "./app";
 import * as schema from "./db/schema";
 import { sendStatusChangeNotification } from "./services/discord";
 import { updateAllLocationsReports } from "./services/reports";
-import type { Env } from "./types";
 
 const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
   event,
