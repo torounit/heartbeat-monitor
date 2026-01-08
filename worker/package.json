@@ -17,7 +17,8 @@
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
-    "tsc": "npx tsc --noEmit"
+    "tsc": "npx tsc --noEmit",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
@@ -35,11 +36,14 @@
     "@hono/eslint-config": "^2.0.4",
     "@hono/vite-build": "^1.8.0",
     "@hono/vite-dev-server": "^0.24.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.0.3",
+    "better-sqlite3": "^12.5.0",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "3.7.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0",
     "vite": "^7.3.1",
