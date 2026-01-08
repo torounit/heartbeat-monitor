@@ -1,5 +1,5 @@
 import { getHeartbeatStatus } from "../../services/heartbeats";
-import honoFactory, { authMiddleware } from "../../services/honoFactory";
+import honoFactory from "../../services/honoFactory";
 import { getLocationByName, getLocations } from "../../services/locations";
 
 interface StatusInfo {
@@ -41,7 +41,6 @@ function enrichStatus(baseStatus: {
 
 const status = honoFactory
   .createApp()
-  .use("*", authMiddleware)
   .get("/", async (c) => {
     const db = c.get("db");
 
