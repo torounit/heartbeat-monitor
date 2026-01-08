@@ -55,8 +55,6 @@ cp .env.sample .env
 # .env ファイルを編集して必要な値を設定
 
 # 4. Cloudflare Workers の環境変数を設定（本番環境）
-wrangler secret put BASIC_AUTH_USERNAME
-wrangler secret put BASIC_AUTH_PASSWORD
 wrangler secret put DISCORD_WEBHOOK_URL  # オプション
 
 # 6. データベースを作成
