@@ -3,11 +3,10 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import * as schema from "../../db/schema";
-import honoFactory, { authMiddleware } from "../../services/honoFactory";
+import honoFactory from "../../services/honoFactory";
 
 const locations = honoFactory
   .createApp()
-  .use("*", authMiddleware)
   .get("/", async (c) => {
     const db = c.get("db");
     const allLocations = await db.query.locations.findMany();

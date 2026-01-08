@@ -2,7 +2,6 @@ import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
 import { describe, expect, it } from "vitest";
 
-import { createBasicAuthHeader } from "../../../test/utilities";
 import * as schema from "../../db/schema";
 import reports from "./reports";
 
@@ -51,18 +50,12 @@ function isErrorResponse(value: unknown): value is ErrorResponse {
 }
 
 describe("Reports API", () => {
-  const authHeader = () =>
-    createBasicAuthHeader(env.BASIC_AUTH_USERNAME, env.BASIC_AUTH_PASSWORD);
-
   describe("GET /", () => {
     it("should return all reports", async () => {
       const res = await reports.request(
         "/",
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -84,17 +77,6 @@ describe("Reports API", () => {
         expect(json[0].location).toHaveProperty("id");
         expect(json[0].location).toHaveProperty("name");
       }
-    });
-
-    it("should require authentication", async () => {
-      const res = await reports.request(
-        "/",
-        {
-          method: "GET",
-        },
-        env,
-      );
-      expect(res.status).toBe(401);
     });
   });
 
@@ -132,9 +114,6 @@ describe("Reports API", () => {
         `/${encodeURIComponent(testLocationName)}`,
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -177,9 +156,6 @@ describe("Reports API", () => {
         `/${encodeURIComponent(testLocationName)}`,
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -196,9 +172,6 @@ describe("Reports API", () => {
         "/NonExistentLocation",
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -207,17 +180,6 @@ describe("Reports API", () => {
       expect(isErrorResponse(jsonUnknown)).toBe(true);
       if (!isErrorResponse(jsonUnknown)) return;
       expect(jsonUnknown.error).toBe("Location Not Found");
-    });
-
-    it("should require authentication", async () => {
-      const res = await reports.request(
-        "/SomeLocation",
-        {
-          method: "GET",
-        },
-        env,
-      );
-      expect(res.status).toBe(401);
     });
   });
 });

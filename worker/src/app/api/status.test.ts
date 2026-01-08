@@ -2,7 +2,6 @@ import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
 import { describe, expect, it } from "vitest";
 
-import { createBasicAuthHeader } from "../../../test/utilities";
 import * as schema from "../../db/schema";
 import status from "./status";
 
@@ -41,18 +40,12 @@ function isErrorResponse(value: unknown): value is ErrorResponse {
 }
 
 describe("Status API", () => {
-  const authHeader = () =>
-    createBasicAuthHeader(env.BASIC_AUTH_USERNAME, env.BASIC_AUTH_PASSWORD);
-
   describe("GET /", () => {
     it("should return status for all locations", async () => {
       const res = await status.request(
         "/",
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -69,17 +62,6 @@ describe("Status API", () => {
       if (isStatusResponse(json[0])) {
         expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
       }
-    });
-
-    it("should require authentication", async () => {
-      const res = await status.request(
-        "/",
-        {
-          method: "GET",
-        },
-        env,
-      );
-      expect(res.status).toBe(401);
     });
   });
 
@@ -103,9 +85,6 @@ describe("Status API", () => {
         `/${encodeURIComponent(testLocationName)}`,
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -134,9 +113,6 @@ describe("Status API", () => {
         `/${encodeURIComponent(testLocationName)}`,
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );
@@ -154,9 +130,6 @@ describe("Status API", () => {
         "/NonExistentLocation",
         {
           method: "GET",
-          headers: new Headers({
-            Authorization: authHeader(),
-          }),
         },
         env,
       );

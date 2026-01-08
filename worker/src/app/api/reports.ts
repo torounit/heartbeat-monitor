@@ -1,12 +1,11 @@
 import { desc, eq } from "drizzle-orm";
 
 import * as schema from "../../db/schema";
-import honoFactory, { authMiddleware } from "../../services/honoFactory";
+import honoFactory from "../../services/honoFactory";
 import { getLocationByName } from "../../services/locations";
 
 const reports = honoFactory
   .createApp()
-  .use("*", authMiddleware)
   .get("/", async (c) => {
     const db = c.get("db");
 

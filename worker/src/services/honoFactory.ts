@@ -1,6 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
-import { basicAuth } from "hono/basic-auth";
-import { createFactory, createMiddleware } from "hono/factory";
+import { createFactory } from "hono/factory";
 import * as schema from "../db/schema";
 import type { Env } from "../types";
 
@@ -12,14 +11,6 @@ const factory = createFactory<Env>({
       await next();
     });
   },
-});
-
-export const authMiddleware = createMiddleware<Env>(async (c, next) => {
-  const auth = basicAuth({
-    username: c.env.BASIC_AUTH_USERNAME,
-    password: c.env.BASIC_AUTH_PASSWORD,
-  });
-  return auth(c, next);
 });
 
 export default factory;
