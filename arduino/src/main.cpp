@@ -95,7 +95,21 @@ void sendHeartbeat() {
   Serial.println("Sending heartbeat check...");
   char json[128];
   sprintf(json, "{\"location\":\"%s\"}", LOCATION_NAME);
-  httpClient.post("/api/heartbeat", "application/json", json);
+
+  // カスタムヘッダーを追加
+  httpClient.beginRequest();
+  httpClient.post("/api/heartbeat");
+  httpClient.sendHeader("Content-Type", "application/json");
+  httpClient.sendHeader("Content-Length", strlen(json));
+
+#if defined(CF_ACCESS_CLIENT_ID) && defined(CF_ACCESS_CLIENT_SECRET)
+  httpClient.sendHeader("CF-Access-Client-Id", CF_ACCESS_CLIENT_ID);
+  httpClient.sendHeader("CF-Access-Client-Secret", CF_ACCESS_CLIENT_SECRET);
+#endif
+
+  httpClient.beginBody();
+  httpClient.print(json);
+  httpClient.endRequest();
 
   int statusCode = httpClient.responseStatusCode();
   String response = httpClient.responseBody();
