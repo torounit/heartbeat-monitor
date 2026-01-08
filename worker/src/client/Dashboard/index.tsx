@@ -58,11 +58,12 @@ async function fetchReports() {
   return res.json();
 }
 
-
 function Reports({
   locationReportsPromise,
 }: {
-  locationReportsPromise: Promise<InferResponseType<typeof client.api.locations.reports.$get>>;
+  locationReportsPromise: Promise<
+    InferResponseType<typeof client.api.locations.reports.$get>
+  >;
 }) {
   const locations = use(locationReportsPromise);
   return (

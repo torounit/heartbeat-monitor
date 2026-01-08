@@ -1,6 +1,6 @@
 import { env } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import app from "..";
+import app from "./";
 
 describe("GET /", () => {
   it("should return status ok", async () => {
