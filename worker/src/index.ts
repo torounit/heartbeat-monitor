@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/d1";
 
-import app from "./app";
+import honoApp from "./app";
 import * as schema from "./db/schema";
 import { sendStatusChangeNotification } from "./services/discord";
 import { updateAllLocationsReports } from "./services/reports";
@@ -27,6 +27,6 @@ const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
 };
 
 export default {
-  fetch: app.fetch,
+  fetch: honoApp.fetch,
   scheduled,
 } satisfies ExportedHandler<CloudflareBindings>;
