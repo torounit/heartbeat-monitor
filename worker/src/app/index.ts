@@ -1,3 +1,7 @@
+import { drizzle } from "drizzle-orm/d1";
+import * as schema from "../db/schema";
+import { sendStatusChangeNotification } from "../services/discord";
+import { updateAllLocationsReports } from "../services/reports";
 import honoFactory from "../services/honoFactory";
 import api from "./api";
 import dashboard from "./dashboard";
@@ -12,6 +16,24 @@ const app = honoFactory
     const location = c.req.header("x-location");
     console.log(location);
     return c.json({ status: "ok" });
+  })
+  // ローカル開発用：scheduledハンドラーを手動でテストするエンドポイント
+  .get("/__debug/trigger-scheduled", async (c) => {
+    const db = drizzle(c.env.DB, { schema });
+
+    console.log("Manual scheduled trigger (debug endpoint)");
+
+    await updateAllLocationsReports(db, async ({ location, newStatus }) => {
+      const webhookUrl = c.env.DISCORD_WEBHOOK_URL;
+      if (webhookUrl) {
+        await sendStatusChangeNotification(webhookUrl, location, newStatus);
+      }
+    });
+
+    return c.json({
+      status: "ok",
+      message: "Scheduled task executed manually",
+    });
   });
 
 export type AppType = typeof app;

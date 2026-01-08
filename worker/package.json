@@ -8,7 +8,7 @@
     "test": "vitest run",
     "dev": "vite",
     "build": "vite build --mode client && vite build",
-    "preview": "npm run build && wrangler dev",
+    "preview": "npm run build && wrangler dev --test-scheduled",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "generate-migration": "drizzle-kit generate",
