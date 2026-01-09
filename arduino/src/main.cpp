@@ -77,6 +77,7 @@ void connectWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nWiFi connected!");
     Serial.print("IP address: ");
+    delay(1000);
     Serial.println(WiFi.localIP());
   } else {
     Serial.println("\nWiFi connection failed");
@@ -97,29 +98,32 @@ void sendHeartbeat() {
   sprintf(json, "{\"location\":\"%s\"}", LOCATION_NAME);
 
   // カスタムヘッダーを追加
+  Serial.println("Starting HTTP POST request...");
   httpClient.beginRequest();
   httpClient.post("/api/heartbeat");
   httpClient.sendHeader("Content-Type", "application/json");
   httpClient.sendHeader("Content-Length", strlen(json));
 
-#if defined(CF_ACCESS_CLIENT_ID) && defined(CF_ACCESS_CLIENT_SECRET)
+#ifdef USE_CF_ACCESS
   httpClient.sendHeader("CF-Access-Client-Id", CF_ACCESS_CLIENT_ID);
   httpClient.sendHeader("CF-Access-Client-Secret", CF_ACCESS_CLIENT_SECRET);
+  Serial.println("Cloudflare Access headers added");
 #endif
 
   httpClient.beginBody();
   httpClient.print(json);
   httpClient.endRequest();
+  Serial.println("HTTP POST request sent.");
 
   int statusCode = httpClient.responseStatusCode();
-  String response = httpClient.responseBody();
-
   Serial.print("Status code: ");
   Serial.println(statusCode);
-  Serial.print("Response: ");
-  Serial.println(response);
 
   if (statusCode >= 200 && statusCode < 300) {
+    String response = httpClient.responseBody();
+    Serial.print("Response: ");
+    Serial.println(response);
+
     setState(STATE_SUCCESS);
     Serial.println("Heartbeat successful!");
   } else {
