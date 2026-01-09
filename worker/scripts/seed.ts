@@ -120,8 +120,7 @@ function seed() {
 
     console.log(`\n💓 ${locationName} のハートビートとレポートを生成中...`);
 
-    // 過去7日間のハートビートを生成（ランダムな間隔）
-    const heartbeatCount = 100 + Math.floor(Math.random() * 50);
+    const heartbeatCount = 100 + Math.floor(Math.random() * 50000);
     const heartbeats = Array.from({ length: heartbeatCount }, () => ({
       locationId,
       createdAt: randomDate(7),
