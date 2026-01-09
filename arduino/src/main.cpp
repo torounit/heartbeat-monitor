@@ -107,7 +107,7 @@ void sendHeartbeat() {
 #ifdef USE_CF_ACCESS
   httpClient.sendHeader("CF-Access-Client-Id", CF_ACCESS_CLIENT_ID);
   httpClient.sendHeader("CF-Access-Client-Secret", CF_ACCESS_CLIENT_SECRET);
-  Serial.println("Cloudflare Access headers added");
+  Serial.println("Cloudflare Access headers added.");
 #endif
 
   httpClient.beginBody();
