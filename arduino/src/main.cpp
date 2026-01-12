@@ -95,7 +95,7 @@ void sendHeartbeat() {
 
   Serial.println("Sending heartbeat check...");
   char json[128];
-  sprintf(json, "{\"location\":\"%s\"}", LOCATION_NAME);
+  sprintf(json, "{\"device\":\"%s\"}", DEVICE_NAME);
 
   // カスタムヘッダーを追加
   Serial.println("Starting HTTP POST request...");
