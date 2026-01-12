@@ -1,8 +1,8 @@
 import { desc, eq } from "drizzle-orm";
 
 import * as schema from "../../db/schema";
-import honoFactory from "../../services/honoFactory";
 import { getDeviceByName } from "../../services/devices";
+import honoFactory from "../../services/honoFactory";
 
 const reports = honoFactory
   .createApp()

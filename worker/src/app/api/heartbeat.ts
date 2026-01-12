@@ -18,7 +18,7 @@ const heartbeat = honoFactory
     async (c) => {
       const data = c.req.valid("json");
       // deviceとlocationの両方をサポート（後方互換性）
-      const deviceName = data.device || data.location;
+      const deviceName = data.device ?? data.location;
 
       if (!deviceName) {
         return c.json({ status: "Device or Location name required" }, 400);

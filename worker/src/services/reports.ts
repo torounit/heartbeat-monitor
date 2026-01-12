@@ -3,9 +3,9 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 
 import * as schema from "../db/schema";
 import type { status } from "../types";
-import { getHeartbeatStatus } from "./heartbeats";
 import type { Device } from "./devices";
 import { getDevices } from "./devices";
+import { getHeartbeatStatus } from "./heartbeats";
 
 type DB = DrizzleD1Database<typeof schema>;
 

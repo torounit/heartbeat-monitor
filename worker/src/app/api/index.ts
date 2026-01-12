@@ -1,6 +1,6 @@
 import honoFactory from "../../services/honoFactory";
-import heartbeat from "./heartbeat";
 import devices from "./devices";
+import heartbeat from "./heartbeat";
 import reports from "./reports";
 import status from "./status";
 

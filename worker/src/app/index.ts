@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import { sendStatusChangeNotification } from "../services/discord";
-import { updateAllDevicesReports } from "../services/reports";
 import honoFactory from "../services/honoFactory";
+import { updateAllDevicesReports } from "../services/reports";
 import api from "./api";
 import dashboard from "./dashboard";
 import { renderer } from "./renderer";

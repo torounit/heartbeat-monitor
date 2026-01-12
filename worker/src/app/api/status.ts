@@ -1,6 +1,6 @@
+import { getDeviceByName, getDevices } from "../../services/devices";
 import { getHeartbeatStatus } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
-import { getDeviceByName, getDevices } from "../../services/devices";
 
 interface StatusInfo {
   device: string;
