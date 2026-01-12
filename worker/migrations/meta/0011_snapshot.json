@@ -25,9 +25,7 @@
       "indexes": {
         "devices_name_unique": {
           "name": "devices_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -68,12 +66,8 @@
           "name": "heartbeats_device_id_devices_id_fk",
           "tableFrom": "heartbeats",
           "tableTo": "devices",
-          "columnsFrom": [
-            "device_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["device_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -120,12 +114,8 @@
           "name": "reports_device_id_devices_id_fk",
           "tableFrom": "reports",
           "tableTo": "devices",
-          "columnsFrom": [
-            "device_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["device_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

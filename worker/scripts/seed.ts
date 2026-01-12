@@ -39,10 +39,9 @@ function getDatabasePath(): string {
   for (const file of files) {
     const dbPath = `${d1Dir}/${file}`;
     try {
-      const result = execSync(
-        `sqlite3 "${dbPath}" ".tables"`,
-        { encoding: "utf-8" },
-      );
+      const result = execSync(`sqlite3 "${dbPath}" ".tables"`, {
+        encoding: "utf-8",
+      });
       if (result.includes("devices") && result.includes("heartbeats")) {
         return dbPath;
       }
