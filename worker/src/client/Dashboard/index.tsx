@@ -35,7 +35,7 @@ function Status({
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-              名称
+              機器名
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
               ステータス
@@ -50,9 +50,9 @@ function Status({
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           {status.map((s) => (
-            <tr key={s.location} class={getStatusClass(s.status)}>
+            <tr key={s.device} class={getStatusClass(s.status)}>
               <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                {s.location}
+                {s.device}
               </td>
               <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                 {s.status}
@@ -72,21 +72,21 @@ function Status({
 }
 
 async function fetchReports() {
-  const res = await client.api.locations.reports.$get();
+  const res = await client.api.devices.reports.$get();
   return res.json();
 }
 
 function Reports({
-  locationReportsPromise,
+  deviceReportsPromise,
 }: {
-  locationReportsPromise: Promise<
-    InferResponseType<typeof client.api.locations.reports.$get>
+  deviceReportsPromise: Promise<
+    InferResponseType<typeof client.api.devices.reports.$get>
   >;
 }) {
-  const locations = use(locationReportsPromise);
+  const devices = use(deviceReportsPromise);
   return (
     <div class="space-y-6">
-      {locations.map(({ name, reports }) => (
+      {devices.map(({ name, reports }) => (
         <div key={name}>
           <h3 class="mb-3 text-xl font-semibold text-gray-800">{name}</h3>
           <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
@@ -136,7 +136,7 @@ function Dashboard() {
       <section>
         <h2 class="mb-4 text-2xl font-semibold text-gray-800">Reports</h2>
         <Suspense fallback={<p class="text-gray-500">Loading...</p>}>
-          <Reports locationReportsPromise={fetchReports()} />
+          <Reports deviceReportsPromise={fetchReports()} />
         </Suspense>
       </section>
     </div>

@@ -1,24 +1,24 @@
 import { getHeartbeatStatus } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
-import { getLocationByName, getLocations } from "../../services/locations";
+import { getDeviceByName, getDevices } from "../../services/devices";
 
 interface StatusInfo {
-  location: string;
+  device: string;
   status: "ok" | "warn" | "error" | "pending";
   lastLogAt: string;
   timeSinceLastLogSeconds?: number;
 }
 
 function enrichStatus(baseStatus: {
-  location: string;
+  device: string;
   status: "ok" | "warn" | "error" | "pending";
   lastLogAt: string;
 }): StatusInfo {
-  const { location, status, lastLogAt } = baseStatus;
+  const { device, status, lastLogAt } = baseStatus;
 
   if (status === "pending") {
     return {
-      location,
+      device,
       status,
       lastLogAt,
     };
@@ -32,7 +32,7 @@ function enrichStatus(baseStatus: {
   );
 
   return {
-    location,
+    device,
     status,
     lastLogAt,
     timeSinceLastLogSeconds,
@@ -44,10 +44,10 @@ const status = honoFactory
   .get("/", async (c) => {
     const db = c.get("db");
 
-    const locations = await getLocations(db);
+    const devices = await getDevices(db);
     const statuses = (
       await Promise.all(
-        locations.map((location) => getHeartbeatStatus(db, location.name)),
+        devices.map((device) => getHeartbeatStatus(db, device.name)),
       )
     )
       .filter((s): s is NonNullable<typeof s> => !!s)
@@ -55,16 +55,16 @@ const status = honoFactory
 
     return c.json(statuses);
   })
-  .get("/:location", async (c) => {
-    const locationName = c.req.param("location");
+  .get("/:device", async (c) => {
+    const deviceName = c.req.param("device");
     const db = c.get("db");
 
-    const location = await getLocationByName(db, locationName);
-    if (!location) {
-      return c.json({ error: "Location Not Found" }, 404);
+    const device = await getDeviceByName(db, deviceName);
+    if (!device) {
+      return c.json({ error: "Device Not Found" }, 404);
     }
 
-    const baseStatus = await getHeartbeatStatus(db, locationName);
+    const baseStatus = await getHeartbeatStatus(db, deviceName);
     if (!baseStatus) {
       return c.json({ error: "Status Not Available" }, 500);
     }

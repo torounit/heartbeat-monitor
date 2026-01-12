@@ -5,16 +5,16 @@ import { z } from "zod";
 import * as schema from "../../db/schema";
 import honoFactory from "../../services/honoFactory";
 
-const locations = honoFactory
+const devices = honoFactory
   .createApp()
   .get("/", async (c) => {
     const db = c.get("db");
-    const allLocations = await db.query.locations.findMany();
-    return c.json(allLocations);
+    const allDevices = await db.query.devices.findMany();
+    return c.json(allDevices);
   })
   .get("/reports", async (c) => {
     const db = c.get("db");
-    const reportsList = await db.query.locations.findMany({
+    const reportsList = await db.query.devices.findMany({
       with: {
         reports: {
           orderBy: [desc(schema.reports.createdAt)],
@@ -35,34 +35,34 @@ const locations = honoFactory
     async (c) => {
       const data = c.req.valid("json");
       const db = c.get("db");
-      const existingLocation = await db.query.locations.findFirst({
-        where: eq(schema.locations.name, data.name),
+      const existingDevice = await db.query.devices.findFirst({
+        where: eq(schema.devices.name, data.name),
       });
 
-      if (existingLocation) {
-        return c.json({ status: "Location Already Exists" }, 409);
+      if (existingDevice) {
+        return c.json({ status: "Device Already Exists" }, 409);
       }
 
-      await db.insert(schema.locations).values({
+      await db.insert(schema.devices).values({
         name: data.name,
       });
 
-      return c.json({ status: "Location Registered" }, 201);
+      return c.json({ status: "Device Registered" }, 201);
     },
   )
   .delete("/:name", async (c) => {
     const name = c.req.param("name");
     const db = c.get("db");
     const deleteCount = await db
-      .delete(schema.locations)
-      .where(eq(schema.locations.name, name))
+      .delete(schema.devices)
+      .where(eq(schema.devices.name, name))
       .returning();
 
     if (deleteCount.length === 0) {
-      return c.json({ status: "Location Not Found" }, 404);
+      return c.json({ status: "Device Not Found" }, 404);
     }
 
-    return c.json({ status: "Location Deleted" });
+    return c.json({ status: "Device Deleted" });
   });
 
-export default locations;
+export default devices;

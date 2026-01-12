@@ -7,29 +7,29 @@ import heartbeat from "./heartbeat";
 
 describe("Heartbeat API", () => {
   describe("POST /", () => {
-    it("should return 404 for unknown location", async () => {
+    it("should return 404 for unknown device", async () => {
       const res = await heartbeat.request(
         "/",
         {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
-          body: JSON.stringify({ location: "Unknown Location" }),
+          body: JSON.stringify({ device: "Unknown Device" }),
         },
         env,
       );
       expect(res.status).toBe(404);
       const json = await res.json();
-      expect(json).toEqual({ status: "Location Not Found" });
+      expect(json).toEqual({ status: "Device Not Found" });
     });
 
-    it("should accept heartbeat for existing location", async () => {
+    it("should accept heartbeat for existing device", async () => {
       const db = drizzle(env.DB, { schema });
 
-      // テスト用のlocationを作成
-      const testLocationName = `Test Location ${String(Date.now())}`;
+      // テスト用のdeviceを作成
+      const testDeviceName = `Test Device ${String(Date.now())}`;
       await db
-        .insert(schema.locations)
-        .values({ name: testLocationName })
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
         .returning();
 
       const res = await heartbeat.request(
@@ -37,7 +37,32 @@ describe("Heartbeat API", () => {
         {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
-          body: JSON.stringify({ location: testLocationName }),
+          body: JSON.stringify({ device: testDeviceName }),
+        },
+        env,
+      );
+
+      expect(res.status).toBe(201);
+      const json = await res.json();
+      expect(json).toEqual({ status: "Heartbeat Logged" });
+    });
+
+    it("should accept heartbeat with location field for backward compatibility", async () => {
+      const db = drizzle(env.DB, { schema });
+
+      // テスト用のdeviceを作成
+      const testDeviceName = `Test Device Compat ${String(Date.now())}`;
+      await db
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
+        .returning();
+
+      const res = await heartbeat.request(
+        "/",
+        {
+          method: "POST",
+          headers: new Headers({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ location: testDeviceName }),
         },
         env,
       );

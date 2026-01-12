@@ -6,7 +6,7 @@ import * as schema from "../../db/schema";
 import status from "./status";
 
 interface StatusResponse {
-  location: string;
+  device: string;
   status: "ok" | "warn" | "error" | "pending";
   lastLogAt?: string;
   timeSinceLastLogSeconds?: number;
@@ -20,8 +20,8 @@ function isStatusResponse(value: unknown): value is StatusResponse {
   return (
     !!value &&
     typeof value === "object" &&
-    "location" in value &&
-    typeof (value as { location?: unknown }).location === "string" &&
+    "device" in value &&
+    typeof (value as { device?: unknown }).device === "string" &&
     "status" in value &&
     typeof (value as { status?: unknown }).status === "string" &&
     ["ok", "warn", "error", "pending"].includes(
@@ -41,7 +41,7 @@ function isErrorResponse(value: unknown): value is ErrorResponse {
 
 describe("Status API", () => {
   describe("GET /", () => {
-    it("should return status for all locations", async () => {
+    it("should return status for all devices", async () => {
       const res = await status.request(
         "/",
         {
@@ -57,7 +57,7 @@ describe("Status API", () => {
         return;
       }
 
-      expect(json[0]).toHaveProperty("location");
+      expect(json[0]).toHaveProperty("device");
       expect(json[0]).toHaveProperty("status");
       if (isStatusResponse(json[0])) {
         expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
@@ -65,24 +65,24 @@ describe("Status API", () => {
     });
   });
 
-  describe("GET /:location", () => {
-    it("should return ok status for location with recent log", async () => {
+  describe("GET /:device", () => {
+    it("should return ok status for device with recent log", async () => {
       const db = drizzle(env.DB, { schema });
 
-      // テスト用のlocationを作成
-      const testLocationName = `Test Location ${String(Date.now())}`;
-      const [location] = await db
-        .insert(schema.locations)
-        .values({ name: testLocationName })
+      // テスト用のdeviceを作成
+      const testDeviceName = `Test Device ${String(Date.now())}`;
+      const [device] = await db
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
         .returning();
 
       // ログを追加
       await db.insert(schema.heartbeats).values({
-        locationId: location.id,
+        deviceId: device.id,
       });
 
       const res = await status.request(
-        `/${encodeURIComponent(testLocationName)}`,
+        `/${encodeURIComponent(testDeviceName)}`,
         {
           method: "GET",
         },
@@ -93,24 +93,24 @@ describe("Status API", () => {
       const jsonUnknown = await res.json();
       expect(isStatusResponse(jsonUnknown)).toBe(true);
       if (!isStatusResponse(jsonUnknown)) return;
-      expect(jsonUnknown.location).toBe(testLocationName);
+      expect(jsonUnknown.device).toBe(testDeviceName);
       expect(jsonUnknown.status).toBe("ok");
       expect(jsonUnknown).toHaveProperty("lastLogAt");
       expect(jsonUnknown).toHaveProperty("timeSinceLastLogSeconds");
     });
 
-    it("should return error status for location without logs", async () => {
+    it("should return error status for device without logs", async () => {
       const db = drizzle(env.DB, { schema });
 
-      // ログのないlocationを作成
-      const testLocationName = `No Log Location ${String(Date.now())}`;
+      // ログのないdeviceを作成
+      const testDeviceName = `No Log Device ${String(Date.now())}`;
       await db
-        .insert(schema.locations)
-        .values({ name: testLocationName })
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
         .returning();
 
       const res = await status.request(
-        `/${encodeURIComponent(testLocationName)}`,
+        `/${encodeURIComponent(testDeviceName)}`,
         {
           method: "GET",
         },
@@ -121,13 +121,13 @@ describe("Status API", () => {
       const jsonUnknown = await res.json();
       expect(isStatusResponse(jsonUnknown)).toBe(true);
       if (!isStatusResponse(jsonUnknown)) return;
-      expect(jsonUnknown.location).toBe(testLocationName);
+      expect(jsonUnknown.device).toBe(testDeviceName);
       expect(jsonUnknown.status).toBe("pending");
     });
 
-    it("should return 404 for non-existent location", async () => {
+    it("should return 404 for non-existent device", async () => {
       const res = await status.request(
-        "/NonExistentLocation",
+        "/NonExistentDevice",
         {
           method: "GET",
         },
@@ -137,7 +137,7 @@ describe("Status API", () => {
       const jsonUnknown = await res.json();
       expect(isErrorResponse(jsonUnknown)).toBe(true);
       if (!isErrorResponse(jsonUnknown)) return;
-      expect(jsonUnknown.error).toBe("Location Not Found");
+      expect(jsonUnknown.error).toBe("Device Not Found");
     });
   });
 });

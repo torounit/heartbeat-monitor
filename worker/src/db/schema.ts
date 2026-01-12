@@ -2,15 +2,15 @@ import { sql, relations } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { status } from "../types";
 
-export const locations = sqliteTable("locations", {
+export const devices = sqliteTable("devices", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull().unique(),
 });
 
 export const heartbeats = sqliteTable("heartbeats", {
   id: int().primaryKey({ autoIncrement: true }),
-  locationId: int("location_id")
-    .references(() => locations.id, {
+  deviceId: int("device_id")
+    .references(() => devices.id, {
       onDelete: "cascade",
     })
     .notNull(),
@@ -21,8 +21,8 @@ export const heartbeats = sqliteTable("heartbeats", {
 
 export const reports = sqliteTable("reports", {
   id: int().primaryKey({ autoIncrement: true }),
-  locationId: int("location_id")
-    .references(() => locations.id, {
+  deviceId: int("device_id")
+    .references(() => devices.id, {
       onDelete: "cascade",
     })
     .notNull(),
@@ -30,21 +30,21 @@ export const reports = sqliteTable("reports", {
   createdAt: text("created_at").notNull(),
 });
 
-export const locationsRelations = relations(locations, ({ many }) => ({
+export const devicesRelations = relations(devices, ({ many }) => ({
   heartbeats: many(heartbeats),
   reports: many(reports),
 }));
 
 export const heartbeatsRelations = relations(heartbeats, ({ one }) => ({
-  location: one(locations, {
-    fields: [heartbeats.locationId],
-    references: [locations.id],
+  device: one(devices, {
+    fields: [heartbeats.deviceId],
+    references: [devices.id],
   }),
 }));
 
 export const reportsRelations = relations(reports, ({ one }) => ({
-  location: one(locations, {
-    fields: [reports.locationId],
-    references: [locations.id],
+  device: one(devices, {
+    fields: [reports.deviceId],
+    references: [devices.id],
   }),
 }));

@@ -4,41 +4,41 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { heartbeatConfig } from "../config";
 import * as schema from "../db/schema";
 import type { status } from "../types";
-import { getLocationByName } from "./locations";
+import { getDeviceByName } from "./devices";
 
 type DB = DrizzleD1Database<typeof schema>;
 
 export type Heartbeat = typeof schema.heartbeats.$inferSelect;
 
-// 指定されたlocationの最新ハートビートを返す（存在しない場合はundefined）
-export async function getLatestHeartbeatByLocationId(
+// 指定されたdeviceの最新ハートビートを返す（存在しない場合はundefined）
+export async function getLatestHeartbeatByDeviceId(
   db: DB,
-  locationId: number,
+  deviceId: number,
 ): Promise<Heartbeat | undefined> {
   return db.query.heartbeats.findFirst({
-    where: eq(schema.heartbeats.locationId, locationId),
+    where: eq(schema.heartbeats.deviceId, deviceId),
     orderBy: [desc(schema.heartbeats.createdAt)],
   });
 }
 
 export interface HeartbeatStatus {
-  location: string;
+  device: string;
   status: status;
   lastLogAt: string;
 }
 
 export async function getHeartbeatStatus(
   db: DB,
-  locationName: string,
+  deviceName: string,
 ): Promise<HeartbeatStatus | undefined> {
-  const location = await getLocationByName(db, locationName);
-  if (!location) return undefined;
+  const device = await getDeviceByName(db, deviceName);
+  if (!device) return undefined;
 
-  const latest = await getLatestHeartbeatByLocationId(db, location.id);
+  const latest = await getLatestHeartbeatByDeviceId(db, device.id);
 
   if (!latest) {
     return {
-      location: locationName,
+      device: deviceName,
       status: "pending",
       lastLogAt: "",
     };
@@ -50,7 +50,7 @@ export async function getHeartbeatStatus(
 
   if (diffSeconds > heartbeatConfig.errorThresholdMinutes * 60) {
     return {
-      location: locationName,
+      device: deviceName,
       status: "error",
       lastLogAt: latest.createdAt,
     };
@@ -58,14 +58,14 @@ export async function getHeartbeatStatus(
 
   if (diffSeconds > heartbeatConfig.warnThresholdMinutes * 60) {
     return {
-      location: locationName,
+      device: deviceName,
       status: "warn",
       lastLogAt: latest.createdAt,
     };
   }
 
   return {
-    location: locationName,
+    device: deviceName,
     status: "ok",
     lastLogAt: latest.createdAt,
   };

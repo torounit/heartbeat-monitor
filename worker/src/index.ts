@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/d1";
 import honoApp from "./app";
 import * as schema from "./db/schema";
 import { sendStatusChangeNotification } from "./services/discord";
-import { updateAllLocationsReports } from "./services/reports";
+import { updateAllDevicesReports } from "./services/reports";
 
 const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
   controller,
@@ -14,10 +14,10 @@ const scheduled: ExportedHandlerScheduledHandler<CloudflareBindings> = (
   switch (controller.cron) {
     case "*/1 * * * *":
       ctx.waitUntil(
-        updateAllLocationsReports(db, async ({ location, newStatus }) => {
+        updateAllDevicesReports(db, async ({ device, newStatus }) => {
           const webhookUrl = env.DISCORD_WEBHOOK_URL;
           if (webhookUrl) {
-            await sendStatusChangeNotification(webhookUrl, location, newStatus);
+            await sendStatusChangeNotification(webhookUrl, device, newStatus);
           }
         }),
       );
