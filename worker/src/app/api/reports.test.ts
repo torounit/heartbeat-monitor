@@ -7,10 +7,10 @@ import reports from "./reports";
 
 interface ReportResponse {
   id: number;
-  locationId: number;
+  deviceId: number;
   status: "ok" | "warn" | "error" | "pending";
   createdAt: string;
-  location: {
+  device: {
     id: number;
     name: string;
   };
@@ -26,8 +26,8 @@ function isReportResponse(value: unknown): value is ReportResponse {
     typeof value === "object" &&
     "id" in value &&
     typeof (value as { id?: unknown }).id === "number" &&
-    "locationId" in value &&
-    typeof (value as { locationId?: unknown }).locationId === "number" &&
+    "deviceId" in value &&
+    typeof (value as { deviceId?: unknown }).deviceId === "number" &&
     "status" in value &&
     typeof (value as { status?: unknown }).status === "string" &&
     ["ok", "warn", "error", "pending"].includes(
@@ -35,8 +35,8 @@ function isReportResponse(value: unknown): value is ReportResponse {
     ) &&
     "createdAt" in value &&
     typeof (value as { createdAt?: unknown }).createdAt === "string" &&
-    "location" in value &&
-    typeof (value as { location?: unknown }).location === "object"
+    "device" in value &&
+    typeof (value as { device?: unknown }).device === "object"
   );
 }
 
@@ -68,50 +68,50 @@ describe("Reports API", () => {
       }
 
       expect(json[0]).toHaveProperty("id");
-      expect(json[0]).toHaveProperty("locationId");
+      expect(json[0]).toHaveProperty("deviceId");
       expect(json[0]).toHaveProperty("status");
       expect(json[0]).toHaveProperty("createdAt");
-      expect(json[0]).toHaveProperty("location");
+      expect(json[0]).toHaveProperty("device");
       if (isReportResponse(json[0])) {
         expect(["ok", "warn", "error", "pending"]).toContain(json[0].status);
-        expect(json[0].location).toHaveProperty("id");
-        expect(json[0].location).toHaveProperty("name");
+        expect(json[0].device).toHaveProperty("id");
+        expect(json[0].device).toHaveProperty("name");
       }
     });
   });
 
-  describe("GET /:location", () => {
-    it("should return reports for a specific location", async () => {
+  describe("GET /:device", () => {
+    it("should return reports for a specific device", async () => {
       const db = drizzle(env.DB, { schema });
 
-      // テスト用のlocationを作成
-      const testLocationName = `Test Location ${String(Date.now())}`;
-      const [location] = await db
-        .insert(schema.locations)
-        .values({ name: testLocationName })
+      // テスト用のdeviceを作成
+      const testDeviceName = `Test Device ${String(Date.now())}`;
+      const [device] = await db
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
         .returning();
 
       // reportsを追加
       await db.insert(schema.reports).values([
         {
-          locationId: location.id,
+          deviceId: device.id,
           status: "ok",
           createdAt: new Date().toISOString(),
         },
         {
-          locationId: location.id,
+          deviceId: device.id,
           status: "warn",
           createdAt: new Date(Date.now() - 60000).toISOString(), // 1分前
         },
         {
-          locationId: location.id,
+          deviceId: device.id,
           status: "error",
           createdAt: new Date(Date.now() - 120000).toISOString(), // 2分前
         },
       ]);
 
       const res = await reports.request(
-        `/${encodeURIComponent(testLocationName)}`,
+        `/${encodeURIComponent(testDeviceName)}`,
         {
           method: "GET",
         },
@@ -129,10 +129,10 @@ describe("Reports API", () => {
       // 最初のレポートが最新であることを確認
       expect(isReportResponse(jsonUnknown[0])).toBe(true);
       if (!isReportResponse(jsonUnknown[0])) return;
-      expect(jsonUnknown[0].locationId).toBe(location.id);
+      expect(jsonUnknown[0].deviceId).toBe(device.id);
       expect(jsonUnknown[0].status).toBe("ok");
-      expect(jsonUnknown[0].location.id).toBe(location.id);
-      expect(jsonUnknown[0].location.name).toBe(testLocationName);
+      expect(jsonUnknown[0].device.id).toBe(device.id);
+      expect(jsonUnknown[0].device.name).toBe(testDeviceName);
 
       // 降順でソートされていることを確認
       expect(jsonUnknown.length).toBe(3);
@@ -142,18 +142,18 @@ describe("Reports API", () => {
       expect(jsonUnknown[2].status).toBe("error");
     });
 
-    it("should return empty array for location without reports", async () => {
+    it("should return empty array for device without reports", async () => {
       const db = drizzle(env.DB, { schema });
 
-      // reportsのないlocationを作成
-      const testLocationName = `No Reports Location ${String(Date.now())}`;
+      // reportsのないdeviceを作成
+      const testDeviceName = `No Reports Device ${String(Date.now())}`;
       await db
-        .insert(schema.locations)
-        .values({ name: testLocationName })
+        .insert(schema.devices)
+        .values({ name: testDeviceName })
         .returning();
 
       const res = await reports.request(
-        `/${encodeURIComponent(testLocationName)}`,
+        `/${encodeURIComponent(testDeviceName)}`,
         {
           method: "GET",
         },
@@ -167,9 +167,9 @@ describe("Reports API", () => {
       expect(jsonUnknown.length).toBe(0);
     });
 
-    it("should return 404 for non-existent location", async () => {
+    it("should return 404 for non-existent device", async () => {
       const res = await reports.request(
-        "/NonExistentLocation",
+        "/NonExistentDevice",
         {
           method: "GET",
         },
@@ -179,7 +179,7 @@ describe("Reports API", () => {
       const jsonUnknown = await res.json();
       expect(isErrorResponse(jsonUnknown)).toBe(true);
       if (!isErrorResponse(jsonUnknown)) return;
-      expect(jsonUnknown.error).toBe("Location Not Found");
+      expect(jsonUnknown.error).toBe("Device Not Found");
     });
   });
 });
