@@ -120,10 +120,10 @@ function seed() {
 
     console.log(`\n💓 ${deviceName} のハートビートとレポートを生成中...`);
 
-    const heartbeatCount = 100 + Math.floor(Math.random() * 50000);
+    const heartbeatCount = 100 + Math.floor(Math.random() * 900);
     const heartbeats = Array.from({ length: heartbeatCount }, () => ({
       deviceId,
-      createdAt: randomDate(7),
+      createdAt: randomDate(0.5),
     }));
 
     // 日付でソート
@@ -144,7 +144,7 @@ function seed() {
     const reports = Array.from({ length: reportCount }, () => ({
       deviceId,
       status: randomStatus(),
-      createdAt: randomDate(7),
+      createdAt: randomDate(0.5),
     }));
 
     // 日付でソート
