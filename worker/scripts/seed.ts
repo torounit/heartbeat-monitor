@@ -43,7 +43,7 @@ function getDatabasePath(): string {
         `sqlite3 "${dbPath}" ".tables"`,
         { encoding: "utf-8" },
       );
-      if (result.includes("locations") && result.includes("heartbeats")) {
+      if (result.includes("devices") && result.includes("heartbeats")) {
         return dbPath;
       }
     } catch {
@@ -91,10 +91,10 @@ function seed() {
   console.log("📝 既存データをクリアしています...");
   db.delete(schema.reports).run();
   db.delete(schema.heartbeats).run();
-  db.delete(schema.locations).run();
+  db.delete(schema.devices).run();
 
-  // Locationの作成
-  const locationNames = [
+  // Deviceの作成
+  const deviceNames = [
     "Arduino-Device-1",
     "Arduino-Device-2",
     "Raspberry-Pi-A",
@@ -103,26 +103,26 @@ function seed() {
   ];
 
   console.log(
-    `📍 ${String(locationNames.length)}個のロケーションを作成しています...`,
+    `📍 ${String(deviceNames.length)}個のデバイスを作成しています...`,
   );
-  const locationIds: number[] = [];
+  const deviceIds: number[] = [];
 
-  for (const name of locationNames) {
-    const result = db.insert(schema.locations).values({ name }).returning().get();
-    locationIds.push(result.id);
+  for (const name of deviceNames) {
+    const result = db.insert(schema.devices).values({ name }).returning().get();
+    deviceIds.push(result.id);
     console.log(`  ✓ ${name} (ID: ${String(result.id)})`);
   }
 
-  // 各Locationにハートビートとレポートを生成
-  for (let i = 0; i < locationIds.length; i++) {
-    const locationId = locationIds[i];
-    const locationName = locationNames[i];
+  // 各Deviceにハートビートとレポートを生成
+  for (let i = 0; i < deviceIds.length; i++) {
+    const deviceId = deviceIds[i];
+    const deviceName = deviceNames[i];
 
-    console.log(`\n💓 ${locationName} のハートビートとレポートを生成中...`);
+    console.log(`\n💓 ${deviceName} のハートビートとレポートを生成中...`);
 
     const heartbeatCount = 100 + Math.floor(Math.random() * 50000);
     const heartbeats = Array.from({ length: heartbeatCount }, () => ({
-      locationId,
+      deviceId,
       createdAt: randomDate(7),
     }));
 
@@ -142,7 +142,7 @@ function seed() {
     // レポート生成（ステータス変更時のログ）
     const reportCount = 5 + Math.floor(Math.random() * 15);
     const reports = Array.from({ length: reportCount }, () => ({
-      locationId,
+      deviceId,
       status: randomStatus(),
       createdAt: randomDate(7),
     }));
@@ -159,7 +159,7 @@ function seed() {
 
   console.log("\n✅ シードデータの生成が完了しました！");
   console.log("\n📊 生成されたデータ:");
-  console.log(`  - Locations: ${String(locationIds.length)}個`);
+  console.log(`  - Devices: ${String(deviceIds.length)}個`);
 
   const totalHeartbeats = db.select().from(schema.heartbeats).all();
   console.log(`  - Heartbeats: ${String(totalHeartbeats.length)}個`);
