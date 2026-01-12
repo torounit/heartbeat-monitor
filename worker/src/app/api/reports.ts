@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm";
 
 import * as schema from "../../db/schema";
 import honoFactory from "../../services/honoFactory";
-import { getLocationByName } from "../../services/locations";
+import { getDeviceByName } from "../../services/devices";
 
 const reports = honoFactory
   .createApp()
@@ -12,26 +12,26 @@ const reports = honoFactory
     const reportsList = await db.query.reports.findMany({
       orderBy: [desc(schema.reports.createdAt)],
       with: {
-        location: true,
+        device: true,
       },
     });
 
     return c.json(reportsList);
   })
-  .get("/:location", async (c) => {
-    const locationName = c.req.param("location");
+  .get("/:device", async (c) => {
+    const deviceName = c.req.param("device");
     const db = c.get("db");
 
-    const location = await getLocationByName(db, locationName);
-    if (!location) {
-      return c.json({ error: "Location Not Found" }, 404);
+    const device = await getDeviceByName(db, deviceName);
+    if (!device) {
+      return c.json({ error: "Device Not Found" }, 404);
     }
 
     const reportsList = await db.query.reports.findMany({
-      where: eq(schema.reports.locationId, location.id),
+      where: eq(schema.reports.deviceId, device.id),
       orderBy: [desc(schema.reports.createdAt)],
       with: {
-        location: true,
+        device: true,
       },
     });
 

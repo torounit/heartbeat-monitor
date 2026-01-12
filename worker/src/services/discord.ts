@@ -1,5 +1,5 @@
 import type { status } from "../types";
-import type { Location } from "./locations";
+import type { Device } from "./devices";
 
 const STATUS_COLORS = {
   ok: 0x00ff00,
@@ -13,7 +13,7 @@ const STATUS_COLORS = {
  */
 export async function sendStatusChangeNotification(
   webhookUrl: string,
-  location: Location,
+  device: Device,
   newStatus: status,
 ): Promise<void> {
   await fetch(webhookUrl, {
@@ -25,12 +25,12 @@ export async function sendStatusChangeNotification(
       embeds: [
         {
           title: "Heartbeat Monitor - Status Update",
-          description: `Location "${location.name}" status changed to ${newStatus}`,
+          description: `Device "${device.name}" status changed to ${newStatus}`,
           color: STATUS_COLORS[newStatus],
           fields: [
             {
-              name: "Location",
-              value: location.name,
+              name: "Device",
+              value: device.name,
               inline: true,
             },
             {

@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import { sendStatusChangeNotification } from "../services/discord";
-import { updateAllLocationsReports } from "../services/reports";
+import { updateAllDevicesReports } from "../services/reports";
 import honoFactory from "../services/honoFactory";
 import api from "./api";
 import dashboard from "./dashboard";
@@ -23,10 +23,10 @@ const app = honoFactory
 
     console.log("Manual scheduled trigger (debug endpoint)");
 
-    await updateAllLocationsReports(db, async ({ location, newStatus }) => {
+    await updateAllDevicesReports(db, async ({ device, newStatus }) => {
       const webhookUrl = c.env.DISCORD_WEBHOOK_URL;
       if (webhookUrl) {
-        await sendStatusChangeNotification(webhookUrl, location, newStatus);
+        await sendStatusChangeNotification(webhookUrl, device, newStatus);
       }
     });
 
