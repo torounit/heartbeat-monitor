@@ -4,8 +4,8 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import type { status } from "../types";
 import { getHeartbeatStatus } from "./heartbeats";
-import type { Location } from "./locations";
-import { getLocations } from "./locations";
+import type { Device } from "./devices";
+import { getDevices } from "./devices";
 
 type DB = DrizzleD1Database<typeof schema>;
 
@@ -14,10 +14,10 @@ type DB = DrizzleD1Database<typeof schema>;
  */
 export async function getLatestReport(
   db: DB,
-  locationId: number,
+  deviceId: number,
 ): Promise<{ status: status } | undefined> {
   return db.query.reports.findFirst({
-    where: eq(schema.reports.locationId, locationId),
+    where: eq(schema.reports.deviceId, deviceId),
     orderBy: [desc(schema.reports.createdAt)],
     columns: {
       status: true,
@@ -26,7 +26,7 @@ export async function getLatestReport(
 }
 
 export type StatusChangeCallback = (params: {
-  location: Location;
+  device: Device;
   newStatus: status;
 }) => Promise<void> | void;
 
@@ -35,22 +35,22 @@ export type StatusChangeCallback = (params: {
  */
 export async function saveReportIfStatusChanged(
   db: DB,
-  location: Location,
+  device: Device,
   currentStatus: status,
   callback?: StatusChangeCallback,
 ): Promise<boolean> {
-  const latestReport = await getLatestReport(db, location.id);
+  const latestReport = await getLatestReport(db, device.id);
   // ステータスが変更された場合のみ保存
   if (latestReport?.status !== currentStatus) {
     const now = new Date().toISOString();
     await db.insert(schema.reports).values({
-      locationId: location.id,
+      deviceId: device.id,
       status: currentStatus,
       createdAt: now,
     });
 
     if (callback) {
-      await callback({ location, newStatus: currentStatus });
+      await callback({ device, newStatus: currentStatus });
     }
 
     return true;
@@ -59,24 +59,24 @@ export async function saveReportIfStatusChanged(
   return false;
 }
 
-export async function updateAllLocationsReports(
+export async function updateAllDevicesReports(
   db: DB,
   callback?: StatusChangeCallback,
 ) {
-  const locations = await getLocations(db);
-  // 各locationのステータスをチェックし、変更があればreportsに保存
+  const devices = await getDevices(db);
+  // 各deviceのステータスをチェックし、変更があればreportsに保存
   await Promise.all(
-    locations.map(async (location) => {
-      const status = await getHeartbeatStatus(db, location.name);
+    devices.map(async (device) => {
+      const status = await getHeartbeatStatus(db, device.name);
       if (status) {
         const saved = await saveReportIfStatusChanged(
           db,
-          location,
+          device,
           status.status,
           callback,
         );
         if (saved) {
-          console.log(`Status changed for ${location.name}: ${status.status}`);
+          console.log(`Status changed for ${device.name}: ${status.status}`);
         }
       }
     }),
