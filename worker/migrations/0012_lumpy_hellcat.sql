@@ -1,0 +1,2 @@
+CREATE INDEX `heartbeats_device_id_created_at_idx` ON `heartbeats` (`device_id`,`created_at`);--> statement-breakpoint
+CREATE INDEX `reports_device_id_created_at_idx` ON `reports` (`device_id`,`created_at`);

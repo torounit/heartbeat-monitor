@@ -85,6 +85,13 @@
       "when": 1768229124359,
       "tag": "0011_dark_jackpot",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1768301109831,
+      "tag": "0012_lumpy_hellcat",
+      "breakpoints": true
     }
   ]
 }
