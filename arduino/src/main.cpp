@@ -47,10 +47,6 @@ void setState(State newState) {
       break;
     case STATE_SUCCESS:
       displayConnected();
-      // 成功時刻を記録
-      lastSuccessTime = millis();
-      Serial.print("Success time recorded: ");
-      Serial.println(lastSuccessTime);
       break;
     case STATE_FAILURE:
       displayFailure();
@@ -136,6 +132,9 @@ void sendHeartbeat() {
     Serial.println(response);
 
     setState(STATE_SUCCESS);
+
+    // 成功時刻を記録
+    lastSuccessTime = millis();
     Serial.println("Heartbeat successful!");
   } else {
     setState(STATE_FAILURE);
@@ -155,7 +154,6 @@ void setup() {
 
   // 起動時刻を記録
   bootTime = millis();
-  lastSuccessTime = bootTime;  // 初期値として起動時刻を設定
   Serial.print("Boot time recorded: ");
   Serial.println(bootTime);
 
@@ -187,11 +185,14 @@ void performReboot(const char* reason) {
 void loop() {
   unsigned long currentTime = millis();
   unsigned long elapsedTime = currentTime - bootTime;
-  unsigned long timeSinceLastSuccess = currentTime - lastSuccessTime;
 
   // 最後の成功から指定時間経過したら再起動（優先度高）
-  if (timeSinceLastSuccess >= FAILURE_REBOOT_TIMEOUT_SECONDS * 1000) {
-    performReboot("No success state for extended period");
+  // ただし、最初の成功があった場合のみチェック
+  if (lastSuccessTime > 0) {
+    unsigned long timeSinceLastSuccess = currentTime - lastSuccessTime;
+    if (timeSinceLastSuccess >= FAILURE_REBOOT_TIMEOUT_SECONDS * 1000) {
+      performReboot("No success state for extended period");
+    }
   }
 
   // 起動から指定時間経過したら再起動（定期再起動）
