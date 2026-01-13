@@ -12,7 +12,7 @@ const app = honoFactory
     const location = c.req.header("x-location");
     console.log(location);
     return c.json({ status: "ok" });
-  })
+  });
 
 export type AppType = typeof app;
 
