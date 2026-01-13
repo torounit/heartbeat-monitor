@@ -105,7 +105,6 @@ void sendHeartbeat() {
   sprintf(json, "{\"device\":\"%s\"}", DEVICE_NAME);
 
   // カスタムヘッダーを追加
-  Serial.println("Starting HTTP POST request...");
   httpClient.beginRequest();
   httpClient.post("/api/heartbeat");
   httpClient.sendHeader("Content-Type", "application/json");
@@ -120,17 +119,12 @@ void sendHeartbeat() {
   httpClient.beginBody();
   httpClient.print(json);
   httpClient.endRequest();
-  Serial.println("HTTP POST request sent.");
-
   int statusCode = httpClient.responseStatusCode();
   Serial.print("Status code: ");
   Serial.println(statusCode);
 
   if (statusCode >= 200 && statusCode < 300) {
     String response = httpClient.responseBody();
-    Serial.print("Response: ");
-    Serial.println(response);
-
     setState(STATE_SUCCESS);
 
     // 成功時刻を記録
