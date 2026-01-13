@@ -186,17 +186,17 @@ void performReboot(const char* reason) {
  */
 void loop() {
   unsigned long currentTime = millis();
-
-  // 起動から指定時間経過したら再起動
   unsigned long elapsedTime = currentTime - bootTime;
-  if (elapsedTime >= AUTO_REBOOT_INTERVAL_SECONDS * 1000) {
-    performReboot("Auto reboot after 1 hour");
-  }
-
-  // 最後の成功から指定時間経過したら再起動
   unsigned long timeSinceLastSuccess = currentTime - lastSuccessTime;
+
+  // 最後の成功から指定時間経過したら再起動（優先度高）
   if (timeSinceLastSuccess >= FAILURE_REBOOT_TIMEOUT_SECONDS * 1000) {
     performReboot("No success state for extended period");
+  }
+
+  // 起動から指定時間経過したら再起動（定期再起動）
+  if (elapsedTime >= AUTO_REBOOT_INTERVAL_SECONDS * 1000) {
+    performReboot("Auto reboot after 1 hour");
   }
 
   if (WiFi.status() != WL_CONNECTED) {
