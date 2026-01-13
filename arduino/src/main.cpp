@@ -1,12 +1,19 @@
 #include <Arduino.h>
 #include <WiFiS3.h>
 #include <ArduinoHttpClient.h>
+#include <WDT.h>
 #include "config.h"
 #include "secrets.h"
 #include "led_matrix.h"
 
 WiFiSSLClient wifiSSLClient;
 HttpClient httpClient = HttpClient(wifiSSLClient, WORKER_HOSTNAME, 443);
+
+// 起動時刻を記録する変数
+unsigned long bootTime = 0;
+
+// 最後にSTATE_SUCCESSになった時刻を記録する変数
+unsigned long lastSuccessTime = 0;
 
 /**
  * @enum
@@ -40,6 +47,10 @@ void setState(State newState) {
       break;
     case STATE_SUCCESS:
       displayConnected();
+      // 成功時刻を記録
+      lastSuccessTime = millis();
+      Serial.print("Success time recorded: ");
+      Serial.println(lastSuccessTime);
       break;
     case STATE_FAILURE:
       displayFailure();
@@ -142,7 +153,31 @@ void setup() {
   Serial.println("Heartbeat Monitor Started");
   initLedMatrix();
 
+  // 起動時刻を記録
+  bootTime = millis();
+  lastSuccessTime = bootTime;  // 初期値として起動時刻を設定
+  Serial.print("Boot time recorded: ");
+  Serial.println(bootTime);
+
   setState(STATE_CONNECTING);
+}
+
+/**
+ * @fn
+ * ウォッチドッグタイマーで再起動を実行する。
+ * @param reason 再起動の理由
+ */
+void performReboot(const char* reason) {
+  Serial.print("Reboot triggered: ");
+  Serial.println(reason);
+  Serial.println("Rebooting in 3 seconds...");
+  delay(3000);
+
+  // ウォッチドッグタイマーで再起動
+  WDT.begin(1000);  // 1秒でタイムアウト
+  while(true) {
+    // ウォッチドッグタイマーをリフレッシュしないことで再起動
+  }
 }
 
 /**
@@ -150,6 +185,20 @@ void setup() {
  * Arduinoのメインループ関数。
  */
 void loop() {
+  unsigned long currentTime = millis();
+
+  // 起動から指定時間経過したら再起動
+  unsigned long elapsedTime = currentTime - bootTime;
+  if (elapsedTime >= AUTO_REBOOT_INTERVAL_SECONDS * 1000) {
+    performReboot("Auto reboot after 1 hour");
+  }
+
+  // 最後の成功から指定時間経過したら再起動
+  unsigned long timeSinceLastSuccess = currentTime - lastSuccessTime;
+  if (timeSinceLastSuccess >= FAILURE_REBOOT_TIMEOUT_SECONDS * 1000) {
+    performReboot("No success state for extended period");
+  }
+
   if (WiFi.status() != WL_CONNECTED) {
     connectWiFi();
     delay(WIFI_RECONNECT_INTERVAL_SECONDS * 1000);
