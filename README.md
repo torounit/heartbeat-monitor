@@ -94,7 +94,7 @@ npm run dev
 - 各ロケーションの過去7日間のハートビート履歴（100-150件）
 - ステータス変更レポート（5-20件）
 
-### Locationの登録
+### デバイスの登録
 
 ```bash
 curl -X POST https://your-worker.workers.dev/api/locations/ \
@@ -107,7 +107,7 @@ curl -X POST https://your-worker.workers.dev/api/locations/ \
 ```bash
 curl -X POST https://your-worker.workers.dev/api/heartbeat \
   -H "Content-Type: application/json" \
-  -d '{"location": "Arduino-Device-1"}'
+  -d '{"device": "Arduino-Device-1"}'
 ```
 
 ### ダッシュボード
@@ -133,7 +133,7 @@ cp src/secrets.h.sample src/secrets.h
 # - WORKER_HOSTNAME: Workers のホスト名（例: your-worker.workers.dev）
 # - WIFI_SSID: WiFi SSID
 # - WIFI_PASSWORD: WiFi パスワード
-# - LOCATION_NAME: このデバイスのlocation名
+# - DEVICE_NAME: デバイス名
 # - CF_ACCESS_CLIENT_ID: Cloudflare Access クライアントID（オプション）
 # - CF_ACCESS_CLIENT_SECRET: Cloudflare Access クライアントシークレット（オプション）
 
