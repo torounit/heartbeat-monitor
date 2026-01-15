@@ -162,7 +162,7 @@ pio device monitor   # シリアルモニター起動
 ### GET/POST /api/devices
 デバイスの一覧取得・登録
 
-### GET /dashboard
+### GET /
 Web ダッシュボード（全デバイスのステータス表示）
 
 ## 環境変数
