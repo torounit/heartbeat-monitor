@@ -163,7 +163,7 @@ pio device monitor   # シリアルモニター起動
 ```
 
 ### GET/POST /api/devices
-デバイス（location）の一覧取得・登録
+デバイスの一覧取得・登録
 
 ### GET /dashboard
 Web ダッシュボード（全デバイスのステータス表示）
@@ -178,7 +178,7 @@ Web ダッシュボード（全デバイスのステータス表示）
 - `WORKER_HOSTNAME`: Workers のホスト名
 - `WIFI_SSID`: WiFi SSID
 - `WIFI_PASSWORD`: WiFi パスワード
-- `LOCATION_NAME`: デバイスのlocation名
+- `DEVICE_NAME`: デバイス名
 - `CF_ACCESS_CLIENT_ID`: Cloudflare Access ID（オプション）
 - `CF_ACCESS_CLIENT_SECRET`: Cloudflare Access Secret（オプション）
 
