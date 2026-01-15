@@ -7,7 +7,10 @@ const app = honoFactory
   .createApp()
   .use(renderer)
   .route("/api", api)
-  .route("/", dashboard);
+  .route("/", dashboard)
+  .get("/dashboard", (c) => {
+    return c.redirect("/");
+  });
 
 export type AppType = typeof app;
 

@@ -11,3 +11,11 @@ describe("GET /", () => {
     expect(html).toContain('<div id="root"');
   });
 });
+
+describe("GET /dashboard", () => {
+  it("should redirect to /", async () => {
+    const res = await app.request("/dashboard", {}, env);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("/");
+  });
+});
