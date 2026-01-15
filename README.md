@@ -112,7 +112,7 @@ curl -X POST https://your-worker.workers.dev/api/heartbeat \
 
 ### ダッシュボード
 
-ブラウザで `https://your-worker.workers.dev/dashboard` にアクセス
+ブラウザで `https://your-worker.workers.dev/` にアクセス
 
 ## Arduino デバイスのセットアップ
 

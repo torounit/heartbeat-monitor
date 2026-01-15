@@ -7,12 +7,7 @@ const app = honoFactory
   .createApp()
   .use(renderer)
   .route("/api", api)
-  .route("/dashboard", dashboard)
-  .get("/", (c) => {
-    const location = c.req.header("x-location");
-    console.log(location);
-    return c.json({ status: "ok" });
-  });
+  .route("/", dashboard);
 
 export type AppType = typeof app;
 
