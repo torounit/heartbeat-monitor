@@ -18,7 +18,7 @@ void setup() {
 
 void loop() {
   String airQuality;
-  bool ok = Bridge.call("get_air_quality").result(airQuality);
+  bool ok = Bridge.call("get_status").result(airQuality);
   if (ok) {
     if (airQuality == "Good") {
       matrix.loadFrame(good);

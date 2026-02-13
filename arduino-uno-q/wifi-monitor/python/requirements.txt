@@ -1,2 +1,3 @@
 arduino-app-bricks @ git+https://github.com/arduino/app-bricks-py.git
 requests
+python-dotenv

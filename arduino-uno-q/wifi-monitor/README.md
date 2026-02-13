@@ -1,4 +1,4 @@
-# 😀 wifi-monitor
+# WIFI Monitor
 
 ### Description
 
