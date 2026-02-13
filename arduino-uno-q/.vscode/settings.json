@@ -1,0 +1,7 @@
+{
+    "C_Cpp.errorSquiggles": "enabled",
+    "python.defaultInterpreterPath": "${workspaceFolder}/wifi-monitor/.venv/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/wifi-monitor/.venv/lib/python3.13/site-packages"
+    ]
+}

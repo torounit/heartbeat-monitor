@@ -11,6 +11,10 @@
     {
       "name": "arduino",
       "path": "arduino"
+    },
+    {
+      "name": "arduino-uno-q",
+      "path": "arduino-uno-q"
     }
   ],
   "settings": {
