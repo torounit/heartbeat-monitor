@@ -6,7 +6,6 @@
 #include <Arduino_RouterBridge.h>
 
 #include "faces.h"
-#include "animation.h"
 
 Arduino_LED_Matrix matrix;
 
