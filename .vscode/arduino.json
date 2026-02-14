@@ -1,0 +1,4 @@
+{
+    "configuration": "link_mode=dynamic,flash_mode=flash,wait_linux_boot=yes",
+    "board": "arduino:zephyr:unoq"
+}

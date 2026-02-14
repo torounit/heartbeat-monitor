@@ -1,7 +1,23 @@
 {
-    "C_Cpp.errorSquiggles": "enabled",
-    "python.defaultInterpreterPath": "${workspaceFolder}/wifi-monitor/.venv/bin/python",
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/wifi-monitor/.venv/lib/python3.13/site-packages"
-    ]
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.default.browse.path": [
+    "/Users/torounit/Library/Arduino15/packages/arduino/hardware/zephyr/**",
+    "/Users/torounit/Developer/arduino/ArduinoCore-zephyr/**",
+    "/Users/torounit/Developer/arduino/ArduinoCore-API/**",
+    "/Users/torounit/Library/Arduino15/libraries/**",
+    "/Users/torounit/Developer/arduino/libraries/**"
+  ],
+  "C_Cpp.default.includePath": [
+    "/Users/torounit/Library/Arduino15/packages/arduino/hardware/zephyr/**",
+    "/Users/torounit/Developer/arduino/ArduinoCore-API/**",
+    "/Users/torounit/Library/Arduino15/libraries/**",
+    "/Users/torounit/Developer/arduino/libraries/**"
+  ],
+  "C_Cpp.default.defines": [
+    "USBCON"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/.venv/lib/python3.13/site-packages"
+  ]
 }
