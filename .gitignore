@@ -1,2 +1,5 @@
 arduino/src/secrets.h
 http-client
+arduino-uno-q/.vscode/c_cpp_properties.json
+arduino-uno-q/.venv
+.env
