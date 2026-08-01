@@ -2,8 +2,8 @@ import { getDeviceByName } from "../../services/devices";
 import { enrichStatus, getHeartbeatStatus } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
 import { getDeviceReportRows, toReportItems } from "../../services/reports";
-import type { DeviceDetailData } from "../../ui/initialData";
-import DeviceDetail from "../../ui/pages/devices/details";
+import { deviceDetailsPage } from "../../ui/pages/devices/details";
+import { renderPage } from "../renderPage";
 
 function NotFound({ name }: { name: string }) {
   return (
@@ -44,21 +44,13 @@ const app = honoFactory.createApp().get("/:device", async (c) => {
     });
   }
 
-  const initial: DeviceDetailData = {
-    status: enrichStatus(baseStatus),
-    reports: toReportItems(reportRows),
-  };
-
-  // 中身をサーバーで描画したうえで、同じデータを data 属性で渡す。
-  // クライアントの初回描画がこの HTML と一致するので差し替えが目に見えない。
-  return c.render(
-    <div
-      id="root"
-      data-device={device.name}
-      data-initial={JSON.stringify(initial)}
-    >
-      <DeviceDetail deviceName={device.name} {...initial} />
-    </div>,
+  return renderPage(
+    c,
+    deviceDetailsPage,
+    {
+      status: enrichStatus(baseStatus),
+      reports: toReportItems(reportRows),
+    },
     { title: device.name },
   );
 });

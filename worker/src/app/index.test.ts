@@ -73,6 +73,8 @@ describe("GET /", () => {
     expect(html).toContain(name);
     expect(html).toContain(">ok<");
     expect(html).toMatch(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/);
+    // クライアントが引き当てに使うキー
+    expect(html).toContain('data-page="home"');
   });
 
   it("should embed round-trippable initial data", async () => {
@@ -112,9 +114,16 @@ describe("GET /devices/:device", () => {
 
     const html = await res.text();
     expect(html).toContain('<div id="root"');
-    // デコード済みのデバイス名がクライアントへ渡ること
-    expect(html).toContain(`data-device="${name}"`);
+    // クライアントが引き当てに使うキー
+    expect(html).toContain('data-page="devices/details"');
     expect(html).toContain(`<title>${name} | Heartbeat Monitor</title>`);
+
+    // デコード済みのデバイス名が初期データ経由でクライアントへ渡ること
+    const initial = readInitialDataAttr(html);
+    if (!isRecord(initial) || !isRecord(initial.status)) {
+      expect.fail("status がオブジェクトではない");
+    }
+    expect(initial.status.device).toBe(name);
   });
 
   it("should render timestamps in JST", async () => {
@@ -208,6 +217,7 @@ describe("GET /devices/:device", () => {
     // クライアントJSを起動させない
     expect(html).not.toContain('<div id="root"');
     expect(html).not.toContain("data-initial");
+    expect(html).not.toContain("data-page");
     expect(html).toContain("デバイスが見つかりません");
   });
 });

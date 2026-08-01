@@ -2,7 +2,9 @@ import { client } from "../../api";
 import ElapsedTime from "../../components/ElapsedTime";
 import ReportList from "../../components/ReportList";
 import StatusBadge from "../../components/StatusBadge";
+import { definePage } from "../../definePage";
 import type { DeviceDetailData } from "../../initialData";
+import { isDeviceDetailData } from "../../initialData";
 import { usePolling } from "../../polling";
 import { encodeDeviceName, formatDateTime } from "../../utils";
 
@@ -30,9 +32,10 @@ export async function fetchDeviceDetail(
   return { status, reports };
 }
 
-type DeviceDetailProps = DeviceDetailData & { deviceName: string };
-
-function Detail({ deviceName, status, reports }: DeviceDetailProps) {
+function Detail({ status, reports }: DeviceDetailData) {
+  // status.device がデバイス名そのもの。初期 props の値は再描画で変わらないので
+  // fetcher の引数として安定している。
+  const deviceName = status.device;
   const live = usePolling({ status, reports }, () =>
     fetchDeviceDetail(deviceName),
   );
@@ -73,7 +76,7 @@ function Detail({ deviceName, status, reports }: DeviceDetailProps) {
   );
 }
 
-function DeviceDetail({ deviceName, status, reports }: DeviceDetailProps) {
+function DeviceDetails({ status, reports }: DeviceDetailData) {
   return (
     <div class="space-y-4">
       <div class="breadcrumbs text-sm">
@@ -81,13 +84,17 @@ function DeviceDetail({ deviceName, status, reports }: DeviceDetailProps) {
           <li>
             <a href="/">ダッシュボード</a>
           </li>
-          <li>{deviceName}</li>
+          <li>{status.device}</li>
         </ul>
       </div>
 
-      <Detail deviceName={deviceName} status={status} reports={reports} />
+      <Detail status={status} reports={reports} />
     </div>
   );
 }
 
-export default DeviceDetail;
+export const deviceDetailsPage = definePage({
+  name: "devices/details",
+  isProps: isDeviceDetailData,
+  render: (props) => <DeviceDetails {...props} />,
+});

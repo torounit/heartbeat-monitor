@@ -3,7 +3,9 @@ import type { DeviceWithReports } from "../../services/reports";
 import { fetchDeviceReports, fetchStatus } from "../api";
 import DeviceStatusCard from "../components/DeviceStatusCard";
 import ReportList from "../components/ReportList";
+import { definePage } from "../definePage";
 import type { DashboardData } from "../initialData";
+import { isDashboardData } from "../initialData";
 import { usePolling } from "../polling";
 import { deviceHref } from "../utils";
 
@@ -53,7 +55,7 @@ function Reports({ deviceReports }: { deviceReports: DeviceWithReports[] }) {
   );
 }
 
-function Dashboard({ statuses, deviceReports }: DashboardData) {
+function Home({ statuses, deviceReports }: DashboardData) {
   return (
     <div class="space-y-10">
       <section class="space-y-4">
@@ -69,4 +71,8 @@ function Dashboard({ statuses, deviceReports }: DashboardData) {
   );
 }
 
-export default Dashboard;
+export const homePage = definePage({
+  name: "home",
+  isProps: isDashboardData,
+  render: (props) => <Home {...props} />,
+});

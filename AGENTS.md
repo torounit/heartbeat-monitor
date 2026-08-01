@@ -38,6 +38,7 @@ heartbeat-monitor/
 │   ├── src/
 │   │   ├── app/         # APIルートとページルート
 │   │   ├── ui/          # 画面コンポーネント（サーバー・クライアント共用）
+│   │   │   └── pages/   # ページ本体。配置を URL 構造に合わせる
 │   │   ├── db/          # データベーススキーマ
 │   │   └── services/    # ビジネスロジックとデータ取得
 │   ├── migrations/      # D1データベースマイグレーション
@@ -70,6 +71,20 @@ heartbeat-monitor/
 `src/ui/` のコンポーネントはサーバーとブラウザの両方で描画される。クライアントは
 `#root` の `data-initial` からサーバーと同じデータを受け取り、初回描画結果が
 サーバー HTML と一致するため差し替えが目に見えない。
+
+**ページの追加手順**（`src/client.tsx` は触らない）
+
+1. `src/ui/pages/` 配下に URL 構造に合わせてページを置く
+   （`/foo/bar` なら `src/ui/pages/foo/bar.tsx`）
+2. そのファイルで `definePage({ name, isProps, render })` を export する。
+   `name` は `#root` の `data-page` に入る識別子で、`ui/pages/` からの相対パスに合わせる
+3. `src/ui/pages/index.ts` の `mountablePages` に1行足す
+4. `src/app/` に同じ階層でルートを置き（`ui/pages/` と 1:1）、
+   `renderPage(c, thePage, props, { title })` を返す
+
+`src/client.tsx` は `data-page` でレジストリを引いて `mount` するだけなので、
+ページが増えても変更しない。404 やエラーページは `renderPage` を通さないため
+`#root` を出力せず、クライアントJSが起動しない。
 
 - **画面が使うデータ取得は `services/` に置き、SSR ルートと API ルートで共有する。**
   実装が分かれると出力がずれ、クライアントへの引き継ぎ時に表示がちらつく
