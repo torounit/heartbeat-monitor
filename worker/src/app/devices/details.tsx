@@ -2,8 +2,8 @@ import { getDeviceByName } from "../../services/devices";
 import { enrichStatus, getHeartbeatStatus } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
 import { getDeviceReportRows, toReportItems } from "../../services/reports";
-import DeviceDetail from "../../ui/DeviceDetail";
 import type { DeviceDetailData } from "../../ui/initialData";
+import DeviceDetail from "../../ui/pages/devices/details";
 
 function NotFound({ name }: { name: string }) {
   return (

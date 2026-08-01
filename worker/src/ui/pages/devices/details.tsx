@@ -1,10 +1,10 @@
-import { client } from "../api";
-import ElapsedTime from "../components/ElapsedTime";
-import ReportList from "../components/ReportList";
-import StatusBadge from "../components/StatusBadge";
-import type { DeviceDetailData } from "../initialData";
-import { usePolling } from "../polling";
-import { encodeDeviceName, formatDateTime } from "../utils";
+import { client } from "../../api";
+import ElapsedTime from "../../components/ElapsedTime";
+import ReportList from "../../components/ReportList";
+import StatusBadge from "../../components/StatusBadge";
+import type { DeviceDetailData } from "../../initialData";
+import { usePolling } from "../../polling";
+import { encodeDeviceName, formatDateTime } from "../../utils";
 
 export async function fetchDeviceDetail(
   deviceName: string,

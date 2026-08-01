@@ -1,12 +1,12 @@
 import { render } from "hono/jsx/dom";
 
-import Dashboard from "./ui/Dashboard";
-import DeviceDetail from "./ui/DeviceDetail";
 import {
   isDashboardData,
   isDeviceDetailData,
   readInitialData,
 } from "./ui/initialData";
+import DeviceDetail from "./ui/pages/devices/details";
+import Dashboard from "./ui/pages/home";
 
 const root = document.getElementById("root");
 if (root) {

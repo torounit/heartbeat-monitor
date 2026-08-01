@@ -1,9 +1,9 @@
-import { getDeviceStatuses } from "../../services/heartbeats";
-import honoFactory from "../../services/honoFactory";
-import { getDevicesWithReports } from "../../services/reports";
-import { REPORTS_PREVIEW_LIMIT } from "../../ui/api";
-import Dashboard from "../../ui/Dashboard";
-import type { DashboardData } from "../../ui/initialData";
+import { getDeviceStatuses } from "../services/heartbeats";
+import honoFactory from "../services/honoFactory";
+import { getDevicesWithReports } from "../services/reports";
+import { REPORTS_PREVIEW_LIMIT } from "../ui/api";
+import type { DashboardData } from "../ui/initialData";
+import Dashboard from "../ui/pages/home";
 
 const app = honoFactory.createApp().get("/", async (c) => {
   const db = c.get("db");
