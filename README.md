@@ -36,7 +36,7 @@ Arduino UNO R4 WiFi と Cloudflare Workers を使用したハートビートモ�
 
 - **Backend**: Cloudflare Workers + Hono v4 + Drizzle ORM
 - **Database**: Cloudflare D1 (SQLite)
-- **Frontend**: Hono JSX + Vite + Tailwind CSS v4 + daisyUI v5
+- **Frontend**: Hono JSX（サーバーサイドレンダリング + クライアント引き継ぎ）+ Vite + Tailwind CSS v4 + daisyUI v5
 - **Device**: Arduino UNO R4 WiFi (PlatformIO)
 
 ## 使い方
@@ -117,6 +117,8 @@ curl -X POST https://your-worker.workers.dev/api/heartbeat \
 
 - **トップページ**: 全デバイスのステータス一覧と、デバイスごとの最新レポート5件
 - **デバイス詳細**: `/devices/<デバイス名>` でステータス概要とレポート全件を表示。トップページのカードや「すべて見る」リンクから遷移できます
+
+どちらのページもサーバーサイドで描画されるため、JavaScript を待たずに内容が表示されます。表示後はクライアントが引き継ぎ、経過時間を毎秒、ステータスを30秒ごとに更新します。
 
 ### API エンドポイント
 

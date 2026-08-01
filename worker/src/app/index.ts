@@ -1,15 +1,17 @@
 import honoFactory from "../services/honoFactory";
 import api from "./api";
-import dashboard from "./dashboard";
-import devicePage from "./devices";
+import deviceDetails from "./devices/details";
+import { errorHandler } from "./errors";
+import home from "./home";
 import { renderer } from "./renderer";
 
 const app = honoFactory
   .createApp()
   .use(renderer)
+  .onError(errorHandler)
   .route("/api", api)
-  .route("/devices", devicePage)
-  .route("/", dashboard)
+  .route("/devices", deviceDetails)
+  .route("/", home)
   .get("/dashboard", (c) => {
     return c.redirect("/");
   });

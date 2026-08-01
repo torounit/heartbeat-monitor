@@ -10,6 +10,59 @@ import { getHeartbeatStatus } from "./heartbeats";
 type DB = DrizzleD1Database<typeof schema>;
 
 /**
+ * 画面が表示に使うレポートの列だけを持つ形。
+ * ReportList はトップと詳細の両方でこれを受け取る。
+ */
+export interface ReportItem {
+  id: number;
+  status: status;
+  createdAt: string;
+}
+
+/**
+ * 全デバイスとそのレポートを取得する。
+ * limit はデバイスごとに適用される（drizzle が相関サブクエリで包むため）。
+ * ダッシュボードのサーバーサイドレンダリングと GET /api/devices/reports の唯一の実装。
+ */
+export async function getDevicesWithReports(db: DB, limit?: number) {
+  return db.query.devices.findMany({
+    with: {
+      reports: {
+        orderBy: [desc(schema.reports.createdAt)],
+        limit,
+      },
+    },
+  });
+}
+
+export type DeviceWithReports = Awaited<
+  ReturnType<typeof getDevicesWithReports>
+>[number];
+
+/**
+ * 指定デバイスのレポートを新しい順に返す。
+ * 詳細ページのサーバーサイドレンダリングと GET /api/reports/:device の唯一のクエリ。
+ * with: { device: true } は API のレスポンス形状を保つために維持する。
+ */
+export async function getDeviceReportRows(db: DB, deviceId: number) {
+  return db.query.reports.findMany({
+    where: eq(schema.reports.deviceId, deviceId),
+    orderBy: [desc(schema.reports.createdAt)],
+    with: {
+      device: true,
+    },
+  });
+}
+
+/**
+ * 表示に使う列だけに落とす。
+ * HTML に埋め込む初期データを膨らませないためのサーバーサイドレンダリング専用。
+ */
+export function toReportItems(rows: readonly ReportItem[]): ReportItem[] {
+  return rows.map(({ id, status, createdAt }) => ({ id, status, createdAt }));
+}
+
+/**
  * 最新のレポートを取得
  */
 export async function getLatestReport(

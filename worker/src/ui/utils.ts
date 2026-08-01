@@ -1,4 +1,9 @@
 const dateTimeFormat = new Intl.DateTimeFormat("ja-JP", {
+  // タイムゾーンを固定しないと、Workers ランタイム（UTC）とブラウザ（閲覧者の
+  // ローカル）で同じ日時が別の文字列になる。サーバーサイドレンダリングを入れると
+  // 差し替えの瞬間に全タイムスタンプが9時間飛ぶため、両者を一致させておく。
+  // lang="ja" / ja-JP と同様、監視対象が国内にある前提。
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",

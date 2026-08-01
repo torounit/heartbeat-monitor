@@ -1,4 +1,4 @@
-import type { DeviceStatus } from "../api";
+import type { DeviceStatus } from "../../services/heartbeats";
 import { deviceHref, formatDateTime } from "../utils";
 import ElapsedTime from "./ElapsedTime";
 import StatusBadge, { statusAccentClass } from "./StatusBadge";

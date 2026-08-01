@@ -1,8 +1,9 @@
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 
 import * as schema from "../../db/schema";
 import { getDeviceByName } from "../../services/devices";
 import honoFactory from "../../services/honoFactory";
+import { getDeviceReportRows } from "../../services/reports";
 
 const reports = honoFactory
   .createApp()
@@ -27,15 +28,7 @@ const reports = honoFactory
       return c.json({ error: "Device Not Found" }, 404);
     }
 
-    const reportsList = await db.query.reports.findMany({
-      where: eq(schema.reports.deviceId, device.id),
-      orderBy: [desc(schema.reports.createdAt)],
-      with: {
-        device: true,
-      },
-    });
-
-    return c.json(reportsList);
+    return c.json(await getDeviceReportRows(db, device.id));
   });
 
 export default reports;

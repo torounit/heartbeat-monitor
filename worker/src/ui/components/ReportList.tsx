@@ -1,18 +1,13 @@
-import type { status } from "../../types";
+import type { ReportItem } from "../../services/reports";
 import { formatDateTime } from "../utils";
 import StatusBadge from "./StatusBadge";
 
 /**
- * /api/devices/reports と /api/reports/:device のどちらの行も
- * 構造的にこれを満たすので、トップと詳細で同じコンポーネントを使える。
+ * ReportItem は表示に必要な列だけを持つ形。
+ * /api/devices/reports と /api/reports/:device のどちらの行も構造的にこれを
+ * 満たすので、トップと詳細で同じコンポーネントを使える。
  */
-export interface ReportItem {
-  id: number;
-  status: status;
-  createdAt: string;
-}
-
-function ReportList({ reports }: { reports: ReportItem[] }) {
+function ReportList({ reports }: { reports: readonly ReportItem[] }) {
   if (reports.length === 0) {
     return (
       <p class="py-2 text-sm text-base-content/60">まだ記録がありません</p>

@@ -1,5 +1,9 @@
 import { getDeviceByName } from "../../services/devices";
+import { enrichStatus, getHeartbeatStatus } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
+import { getDeviceReportRows, toReportItems } from "../../services/reports";
+import { deviceDetailsPage } from "../../ui/pages/devices/details";
+import { renderPage } from "../renderPage";
 
 function NotFound({ name }: { name: string }) {
   return (
@@ -30,10 +34,25 @@ const app = honoFactory.createApp().get("/:device", async (c) => {
     });
   }
 
-  // 存在するデバイス名を data 属性で渡し、クライアント側でのパス解析を不要にする
-  return c.render(<div id="root" data-device={device.name} />, {
-    title: device.name,
-  });
+  const [baseStatus, reportRows] = await Promise.all([
+    getHeartbeatStatus(db, device.name),
+    getDeviceReportRows(db, device.id),
+  ]);
+  if (!baseStatus) {
+    return c.render(<NotFound name={deviceName} />, {
+      title: "デバイスが見つかりません",
+    });
+  }
+
+  return renderPage(
+    c,
+    deviceDetailsPage,
+    {
+      status: enrichStatus(baseStatus),
+      reports: toReportItems(reportRows),
+    },
+    { title: device.name },
+  );
 });
 
 export default app;

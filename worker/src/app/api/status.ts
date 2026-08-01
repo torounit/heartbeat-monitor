@@ -1,59 +1,17 @@
-import { getDeviceByName, getDevices } from "../../services/devices";
-import { getHeartbeatStatus } from "../../services/heartbeats";
+import { getDeviceByName } from "../../services/devices";
+import {
+  enrichStatus,
+  getDeviceStatuses,
+  getHeartbeatStatus,
+} from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
-
-interface StatusInfo {
-  device: string;
-  status: "ok" | "warn" | "error" | "pending";
-  lastLogAt: string;
-  timeSinceLastLogSeconds?: number;
-}
-
-function enrichStatus(baseStatus: {
-  device: string;
-  status: "ok" | "warn" | "error" | "pending";
-  lastLogAt: string;
-}): StatusInfo {
-  const { device, status, lastLogAt } = baseStatus;
-
-  if (status === "pending") {
-    return {
-      device,
-      status,
-      lastLogAt,
-    };
-  }
-
-  // timeSinceLastLogSecondsを計算
-  const latestTime = new Date(lastLogAt);
-  const now = new Date();
-  const timeSinceLastLogSeconds = Math.floor(
-    (now.getTime() - latestTime.getTime()) / 1000,
-  );
-
-  return {
-    device,
-    status,
-    lastLogAt,
-    timeSinceLastLogSeconds,
-  };
-}
 
 const status = honoFactory
   .createApp()
   .get("/", async (c) => {
     const db = c.get("db");
 
-    const devices = await getDevices(db);
-    const statuses = (
-      await Promise.all(
-        devices.map((device) => getHeartbeatStatus(db, device.name)),
-      )
-    )
-      .filter((s): s is NonNullable<typeof s> => !!s)
-      .map(enrichStatus);
-
-    return c.json(statuses);
+    return c.json(await getDeviceStatuses(db));
   })
   .get("/:device", async (c) => {
     const deviceName = c.req.param("device");
