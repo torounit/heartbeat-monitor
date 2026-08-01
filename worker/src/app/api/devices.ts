@@ -12,18 +12,29 @@ const devices = honoFactory
     const allDevices = await db.query.devices.findMany();
     return c.json(allDevices);
   })
-  .get("/reports", async (c) => {
-    const db = c.get("db");
-    const reportsList = await db.query.devices.findMany({
-      with: {
-        reports: {
-          orderBy: [desc(schema.reports.createdAt)],
+  .get(
+    "/reports",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().int().min(1).max(100).optional(),
+      }),
+    ),
+    async (c) => {
+      const { limit } = c.req.valid("query");
+      const db = c.get("db");
+      const reportsList = await db.query.devices.findMany({
+        with: {
+          reports: {
+            orderBy: [desc(schema.reports.createdAt)],
+            limit,
+          },
         },
-      },
-    });
+      });
 
-    return c.json(reportsList);
-  })
+      return c.json(reportsList);
+    },
+  )
   .post(
     "/",
     zValidator(

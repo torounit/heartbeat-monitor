@@ -1,6 +1,63 @@
 import { env } from "cloudflare:test";
+import { drizzle } from "drizzle-orm/d1";
 import { describe, it, expect } from "vitest";
+
+import * as schema from "../../db/schema";
 import devices from "./devices";
+
+interface DeviceWithReportsResponse {
+  id: number;
+  name: string;
+  reports: { id: number; status: string; createdAt: string }[];
+}
+
+// Array.isArray は unknown を any[] に絞ってしまうため、専用のガードを使う
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
+function isDeviceWithReportsResponse(
+  value: unknown,
+): value is DeviceWithReportsResponse {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    "id" in value &&
+    typeof (value as { id?: unknown }).id === "number" &&
+    "name" in value &&
+    typeof (value as { name?: unknown }).name === "string" &&
+    "reports" in value &&
+    Array.isArray((value as { reports?: unknown }).reports)
+  );
+}
+
+/** レポート3件を持つデバイスを作成し、その名前を返す */
+async function seedDeviceWithReports(): Promise<string> {
+  const db = drizzle(env.DB, { schema });
+  const name = `Report Limit Device ${String(Date.now())}`;
+  const [device] = await db.insert(schema.devices).values({ name }).returning();
+
+  const base = Date.now();
+  await db.insert(schema.reports).values([
+    {
+      deviceId: device.id,
+      status: "ok",
+      createdAt: new Date(base).toISOString(),
+    },
+    {
+      deviceId: device.id,
+      status: "warn",
+      createdAt: new Date(base - 60_000).toISOString(),
+    },
+    {
+      deviceId: device.id,
+      status: "error",
+      createdAt: new Date(base - 120_000).toISOString(),
+    },
+  ]);
+
+  return name;
+}
 
 describe("Devices API", () => {
   describe("GET /", () => {
@@ -15,6 +72,93 @@ describe("Devices API", () => {
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(Array.isArray(json)).toBe(true);
+    });
+  });
+
+  describe("GET /reports", () => {
+    it("should limit reports per device when limit is given", async () => {
+      const name = await seedDeviceWithReports();
+
+      const res = await devices.request(
+        "/reports?limit=2",
+        { method: "GET" },
+        env,
+      );
+      expect(res.status).toBe(200);
+
+      const json: unknown = await res.json();
+      if (!isUnknownArray(json)) {
+        expect.fail("expected an array");
+      }
+      const target = json.find(
+        (d) => isDeviceWithReportsResponse(d) && d.name === name,
+      );
+      if (!isDeviceWithReportsResponse(target)) {
+        expect.fail("seeded device not found in response");
+      }
+
+      expect(target.reports).toHaveLength(2);
+      // createdAt の降順（新しい順）で切り取られていること
+      expect(target.reports.map((r) => r.status)).toEqual(["ok", "warn"]);
+    });
+
+    it("should return all reports when limit is omitted", async () => {
+      const name = await seedDeviceWithReports();
+
+      const res = await devices.request("/reports", { method: "GET" }, env);
+      expect(res.status).toBe(200);
+
+      const json: unknown = await res.json();
+      if (!isUnknownArray(json)) {
+        expect.fail("expected an array");
+      }
+      const target = json.find(
+        (d) => isDeviceWithReportsResponse(d) && d.name === name,
+      );
+      if (!isDeviceWithReportsResponse(target)) {
+        expect.fail("seeded device not found in response");
+      }
+
+      expect(target.reports).toHaveLength(3);
+    });
+
+    it("should apply the limit per device, not globally", async () => {
+      await seedDeviceWithReports();
+
+      const res = await devices.request(
+        "/reports?limit=1",
+        { method: "GET" },
+        env,
+      );
+      expect(res.status).toBe(200);
+
+      const json: unknown = await res.json();
+      if (!isUnknownArray(json)) {
+        expect.fail("expected an array");
+      }
+      expect(json.length).toBeGreaterThan(0);
+      for (const device of json) {
+        if (!isDeviceWithReportsResponse(device)) {
+          expect.fail("unexpected response shape");
+        }
+        expect(device.reports.length).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it("should return 400 for an invalid limit", async () => {
+      const zero = await devices.request(
+        "/reports?limit=0",
+        { method: "GET" },
+        env,
+      );
+      expect(zero.status).toBe(400);
+
+      const nan = await devices.request(
+        "/reports?limit=abc",
+        { method: "GET" },
+        env,
+      );
+      expect(nan.status).toBe(400);
     });
   });
 

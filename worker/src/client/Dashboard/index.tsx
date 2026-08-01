@@ -1,119 +1,71 @@
-import type { InferResponseType } from "hono/client";
-import { hc } from "hono/client";
-import { Suspense, use } from "hono/jsx/dom";
-import type { AppType } from "../../app";
+import { ErrorBoundary, Suspense, use } from "hono/jsx/dom";
 
-const client = hc<AppType>("/");
+import type { DeviceStatus, DeviceWithReports } from "../api";
+import { client } from "../api";
+import DeviceStatusCard from "../components/DeviceStatusCard";
+import ErrorState from "../components/ErrorState";
+import Loading from "../components/Loading";
+import ReportList from "../components/ReportList";
+import { usePolling } from "../polling";
+import { deviceHref } from "../utils";
 
-async function fetchStatus() {
+const REPORTS_PREVIEW_LIMIT = 5;
+
+async function fetchStatus(): Promise<DeviceStatus[]> {
   const res = await client.api.status.$get();
   return res.json();
 }
 
-function getStatusClass(status: string): string {
-  switch (status) {
-    case "ok":
-      return "bg-green-100 hover:bg-green-200";
-    case "error":
-      return "bg-red-100 hover:bg-red-200";
-    case "warn":
-      return "bg-yellow-100 hover:bg-yellow-200";
-    default:
-      return "bg-gray-50 hover:bg-gray-100";
-  }
+async function fetchReports(): Promise<DeviceWithReports[]> {
+  const res = await client.api.devices.reports.$get({
+    query: { limit: String(REPORTS_PREVIEW_LIMIT) },
+  });
+  return res.json();
 }
 
-function Status({
-  statusPromise,
-}: {
-  statusPromise: Promise<InferResponseType<typeof client.api.status.$get>>;
-}) {
-  const status = use(statusPromise);
+function Status({ statusPromise }: { statusPromise: Promise<DeviceStatus[]> }) {
+  const statuses = usePolling(use(statusPromise), fetchStatus);
+
+  if (statuses.length === 0) {
+    return <p class="text-base-content/60">デバイスが登録されていません</p>;
+  }
+
   return (
-    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-              機器名
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-              ステータス
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-              最終ログ日時
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-              最終ログからの経過時間（秒）
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          {status.map((s) => (
-            <tr key={s.device} class={getStatusClass(s.status)}>
-              <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                {s.device}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {s.status}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {new Date(s.lastLogAt).toLocaleString()}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                {s.timeSinceLastLogSeconds ?? "N/A"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {statuses.map((status) => (
+        <DeviceStatusCard key={status.device} status={status} />
+      ))}
     </div>
   );
-}
-
-async function fetchReports() {
-  const res = await client.api.devices.reports.$get();
-  return res.json();
 }
 
 function Reports({
   deviceReportsPromise,
 }: {
-  deviceReportsPromise: Promise<
-    InferResponseType<typeof client.api.devices.reports.$get>
-  >;
+  deviceReportsPromise: Promise<DeviceWithReports[]>;
 }) {
-  const devices = use(deviceReportsPromise);
+  const devices = usePolling(use(deviceReportsPromise), fetchReports);
+
+  if (devices.length === 0) {
+    return <p class="text-base-content/60">デバイスが登録されていません</p>;
+  }
+
   return (
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {devices.map(({ name, reports }) => (
-        <div key={name}>
-          <h3 class="mb-3 text-xl font-semibold text-gray-800">{name}</h3>
-          <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-                    日時
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-700">
-                    ステータス
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                {reports.map((report) => (
-                  <tr key={report.id} class={getStatusClass(report.status)}>
-                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {new Date(report.createdAt).toLocaleString()}
-                    </td>
-                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {report.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div
+          key={name}
+          class="card border border-base-300 bg-base-100 shadow-sm"
+        >
+          <div class="card-body gap-2 p-4">
+            <h3 class="font-semibold wrap-break-word">{name}</h3>
+            <ReportList reports={reports} />
+            <a
+              href={deviceHref(name)}
+              class="link link-primary self-end text-sm"
+            >
+              すべて見る →
+            </a>
           </div>
         </div>
       ))}
@@ -123,21 +75,23 @@ function Reports({
 
 function Dashboard() {
   return (
-    <div class="container mx-auto px-4 py-8">
-      <h1 class="mb-8 text-4xl font-bold text-gray-900">Heartbeat Monitor</h1>
-
-      <section class="mb-12">
-        <h2 class="mb-4 text-2xl font-semibold text-gray-800">Status</h2>
-        <Suspense fallback={<p class="text-gray-500">Loading...</p>}>
-          <Status statusPromise={fetchStatus()} />
-        </Suspense>
+    <div class="space-y-10">
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold sm:text-2xl">Status</h2>
+        <ErrorBoundary fallback={<ErrorState />}>
+          <Suspense fallback={<Loading />}>
+            <Status statusPromise={fetchStatus()} />
+          </Suspense>
+        </ErrorBoundary>
       </section>
 
-      <section>
-        <h2 class="mb-4 text-2xl font-semibold text-gray-800">Reports</h2>
-        <Suspense fallback={<p class="text-gray-500">Loading...</p>}>
-          <Reports deviceReportsPromise={fetchReports()} />
-        </Suspense>
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold sm:text-2xl">Reports</h2>
+        <ErrorBoundary fallback={<ErrorState />}>
+          <Suspense fallback={<Loading />}>
+            <Reports deviceReportsPromise={fetchReports()} />
+          </Suspense>
+        </ErrorBoundary>
       </section>
     </div>
   );

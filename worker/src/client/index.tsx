@@ -1,11 +1,18 @@
 import { render } from "hono/jsx/dom";
-import Dashboard from "./Dashboard";
 
-function App() {
-  return <Dashboard />;
-}
+import Dashboard from "./Dashboard";
+import DeviceDetail from "./DeviceDetail";
 
 const root = document.getElementById("root");
 if (root) {
-  render(<App />, root);
+  // サーバー側がデコード済みのデバイス名を data 属性で渡す（詳細ページのみ）
+  const deviceName = root.dataset.device;
+  render(
+    deviceName === undefined ? (
+      <Dashboard />
+    ) : (
+      <DeviceDetail deviceName={deviceName} />
+    ),
+    root,
+  );
 }

@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+language: "ja-JP"
+tone_instructions: "簡潔で丁寧な日本語でレビューしてください。指摘は理由と具体的な修正案をセットで示してください。"
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  collapse_walkthrough: true
+  poem: false
+
+  # drizzle-kit の生成物やビルド成果物はレビュー対象外
+  path_filters:
+    - "!worker/migrations/**"
+    - "!worker/dist/**"
+    - "!**/package-lock.json"
+    - "!worker/worker-configuration.d.ts"
+
+  path_instructions:
+    - path: "worker/src/**/*.{ts,tsx}"
+      instructions: |
+        - TypeScript strict mode 前提。型アサーション（as）ではなく型ガードで絞り込むこと。
+        - DB アクセスは services/ 層に置く。ルートハンドラから直接 drizzle を叩いていたら指摘する。
+        - Cloudflare Workers は V8 Isolate 上で動くため Node.js API は使えない。
+        - 環境変数は CloudflareBindings 型経由でアクセスする。シークレットをコードに直書きしない。
+    - path: "worker/src/client/**/*.tsx"
+      instructions: |
+        - React ではなく hono/jsx。属性は className ではなく class を使う。
+        - スタイルは Tailwind CSS v4 + daisyUI。色は base-100 / base-content などの
+          daisyUI セマンティックトークンを使い、gray-900 のようなハードコードは避ける。
+        - Tailwind v4 はソース中のリテラルしかクラス名として検出しないため、
+          `badge-${status}` のような文字列組み立ては動作しない。
+        - モバイル（375px 幅）で横スクロールが発生しないこと。
+    - path: "worker/src/**/*.test.ts"
+      instructions: |
+        - Vitest + @cloudflare/vitest-pool-workers。cloudflare:test の env を使い、
+          サブアプリを直接 request する既存の書き方に合わせる。
+        - テスト間でストレージが共有され seed データも存在するため、
+          デバイス名は `Test Device ${Date.now()}` のように一意にする。
+        - レスポンスの検証はキャストではなく手書きの型ガードで行う。
+    - path: "worker/src/db/schema.ts"
+      instructions: |
+        - スキーマ変更時は drizzle-kit generate によるマイグレーション生成が必要。
+          マイグレーションファイルが伴っていなければ指摘する。
+        - 外部キーには onDelete: "cascade" を設定する。
+    - path: "arduino/**/*.{ino,cpp,h}"
+      instructions: |
+        - Arduino UNO R4 WiFi 向け。WiFi 接続には自動再接続を実装する。
+        - シークレットは secrets.h に置き、Git 管理下に含めない。
+        - エラー時は LED マトリクスで視覚的にフィードバックする。
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+
+  tools:
+    eslint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    actionlint:
+      enabled: true
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false
+
+chat:
+  auto_reply: true
