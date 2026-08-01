@@ -20,7 +20,7 @@ Arduino UNO R4 WiFi と Cloudflare Workers を使用したハートビートモ�
 
 ### Frontend
 - **Framework**: Hono JSX
-- **Styling**: Tailwind CSS v4
+- **Styling**: Tailwind CSS v4 + daisyUI v5（`src/style.css` の `@plugin "daisyui"` で設定、light テーマのみ）
 - **Build**: Vite
 
 ### Device (Arduino)
@@ -162,8 +162,20 @@ pio device monitor   # シリアルモニター起動
 ### GET/POST /api/devices
 デバイスの一覧取得・登録
 
+### GET /api/devices/reports
+全デバイスとそのレポート（ステータス変化履歴）を取得する
+
+**Query Parameters:**
+- `limit`: デバイスごとに返すレポートの最大件数（1〜100、省略時は全件）
+
+### GET /api/reports/:device
+指定デバイスのレポートを新しい順に全件取得する
+
 ### GET /
-Web ダッシュボード（全デバイスのステータス表示）
+Web ダッシュボード（全デバイスのステータス一覧 + デバイスごとの最新レポート5件）
+
+### GET /devices/:device
+デバイス詳細ページ（ステータス概要 + レポート全件）。未登録のデバイス名は 404 を返す。
 
 ## 環境変数
 
