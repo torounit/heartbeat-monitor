@@ -1,9 +1,4 @@
-import { getDeviceByName } from "../../services/devices";
-import {
-  enrichStatus,
-  getDeviceStatuses,
-  getHeartbeatStatus,
-} from "../../services/heartbeats";
+import { getDeviceStatus, getDeviceStatuses } from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
 
 const status = honoFactory
@@ -17,17 +12,12 @@ const status = honoFactory
     const deviceName = c.req.param("device");
     const db = c.get("db");
 
-    const device = await getDeviceByName(db, deviceName);
-    if (!device) {
+    const deviceStatus = await getDeviceStatus(db, deviceName);
+    if (!deviceStatus) {
       return c.json({ error: "Device Not Found" }, 404);
     }
 
-    const baseStatus = await getHeartbeatStatus(db, deviceName);
-    if (!baseStatus) {
-      return c.json({ error: "Status Not Available" }, 500);
-    }
-
-    return c.json(enrichStatus(baseStatus));
+    return c.json(deviceStatus);
   });
 
 export default status;

@@ -4,8 +4,10 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import type { status } from "../types";
 import type { Device } from "./devices";
-import { getDevices } from "./devices";
-import { getHeartbeatStatus } from "./heartbeats";
+import {
+  getDevicesWithLatestHeartbeat,
+  resolveDeviceStatus,
+} from "./heartbeats";
 
 type DB = DrizzleD1Database<typeof schema>;
 
@@ -116,21 +118,20 @@ export async function updateAllDevicesReports(
   db: DB,
   callback?: StatusChangeCallback,
 ) {
-  const devices = await getDevices(db);
+  // デバイスと最新ハートビートを1クエリで取る
+  const devices = await getDevicesWithLatestHeartbeat(db);
   // 各deviceのステータスをチェックし、変更があればreportsに保存
   await Promise.all(
-    devices.map(async (device) => {
-      const status = await getHeartbeatStatus(db, device.name);
-      if (status) {
-        const saved = await saveReportIfStatusChanged(
-          db,
-          device,
-          status.status,
-          callback,
-        );
-        if (saved) {
-          console.log(`Status changed for ${device.name}: ${status.status}`);
-        }
+    devices.map(async ({ heartbeats, ...device }) => {
+      const status = resolveDeviceStatus(device, heartbeats.at(0));
+      const saved = await saveReportIfStatusChanged(
+        db,
+        device,
+        status.status,
+        callback,
+      );
+      if (saved) {
+        console.log(`Status changed for ${device.name}: ${status.status}`);
       }
     }),
   );

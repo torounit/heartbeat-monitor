@@ -30,6 +30,11 @@ function isStatusResponse(value: unknown): value is StatusResponse {
   );
 }
 
+// Array.isArray は unknown を any[] に絞ってしまうため、専用のガードを使う
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
 function isErrorResponse(value: unknown): value is ErrorResponse {
   return (
     !!value &&
@@ -138,6 +143,63 @@ describe("Status API", () => {
       expect(isErrorResponse(jsonUnknown)).toBe(true);
       if (!isErrorResponse(jsonUnknown)) return;
       expect(jsonUnknown.error).toBe("Device Not Found");
+    });
+  });
+
+  // 一覧・単体とも「デバイスごとに最新の1件」を取る実装なので、
+  // 複数ハートビートがある状態で最新が選ばれることを固定する。
+  describe("latest heartbeat selection", () => {
+    const newest = "2026-03-03T03:00:00Z";
+
+    async function seedDeviceWithThreeHeartbeats(): Promise<string> {
+      const db = drizzle(env.DB, { schema });
+      const name = `Multi Heartbeat Device ${String(Date.now())}`;
+      const [device] = await db
+        .insert(schema.devices)
+        .values({ name })
+        .returning();
+
+      // わざと新しい順で入れない（挿入順ではなく created_at で選ぶこと）
+      await db.insert(schema.heartbeats).values([
+        { deviceId: device.id, createdAt: "2026-01-01T01:00:00Z" },
+        { deviceId: device.id, createdAt: newest },
+        { deviceId: device.id, createdAt: "2026-02-02T02:00:00Z" },
+      ]);
+
+      return name;
+    }
+
+    it("should pick the newest heartbeat in the list endpoint", async () => {
+      const name = await seedDeviceWithThreeHeartbeats();
+
+      const res = await status.request("/", { method: "GET" }, env);
+      expect(res.status).toBe(200);
+
+      const json: unknown = await res.json();
+      if (!isUnknownArray(json)) {
+        expect.fail("expected an array");
+      }
+      const target = json.find((s) => isStatusResponse(s) && s.device === name);
+      if (!isStatusResponse(target)) {
+        expect.fail("seeded device not found in response");
+      }
+      expect(target.lastLogAt).toBe(newest);
+    });
+
+    it("should pick the newest heartbeat in the single endpoint", async () => {
+      const name = await seedDeviceWithThreeHeartbeats();
+
+      const res = await status.request(
+        `/${encodeURIComponent(name)}`,
+        { method: "GET" },
+        env,
+      );
+      expect(res.status).toBe(200);
+
+      const jsonUnknown = await res.json();
+      expect(isStatusResponse(jsonUnknown)).toBe(true);
+      if (!isStatusResponse(jsonUnknown)) return;
+      expect(jsonUnknown.lastLogAt).toBe(newest);
     });
   });
 });
