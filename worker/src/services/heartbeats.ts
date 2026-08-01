@@ -4,7 +4,7 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { heartbeatConfig } from "../config";
 import * as schema from "../db/schema";
 import type { status } from "../types";
-import { getDeviceByName, getDevices } from "./devices";
+import type { Device } from "./devices";
 
 type DB = DrizzleD1Database<typeof schema>;
 
@@ -21,56 +21,6 @@ export async function getLatestHeartbeatByDeviceId(
   });
 }
 
-export interface HeartbeatStatus {
-  device: string;
-  status: status;
-  lastLogAt: string;
-}
-
-export async function getHeartbeatStatus(
-  db: DB,
-  deviceName: string,
-): Promise<HeartbeatStatus | undefined> {
-  const device = await getDeviceByName(db, deviceName);
-  if (!device) return undefined;
-
-  const latest = await getLatestHeartbeatByDeviceId(db, device.id);
-
-  if (!latest) {
-    return {
-      device: deviceName,
-      status: "pending",
-      lastLogAt: "",
-    };
-  }
-
-  const latestTime = new Date(latest.createdAt);
-  const now = new Date();
-  const diffSeconds = Math.floor((now.getTime() - latestTime.getTime()) / 1000);
-
-  if (diffSeconds > heartbeatConfig.errorThresholdMinutes * 60) {
-    return {
-      device: deviceName,
-      status: "error",
-      lastLogAt: latest.createdAt,
-    };
-  }
-
-  if (diffSeconds > heartbeatConfig.warnThresholdMinutes * 60) {
-    return {
-      device: deviceName,
-      status: "warn",
-      lastLogAt: latest.createdAt,
-    };
-  }
-
-  return {
-    device: deviceName,
-    status: "ok",
-    lastLogAt: latest.createdAt,
-  };
-}
-
 /**
  * 画面と API が共有するデバイスの状態。
  * サーバーサイドレンダリングとクライアントのポーリングが同じ形を扱うため、
@@ -80,33 +30,62 @@ export interface DeviceStatus {
   device: string;
   status: status;
   lastLogAt: string;
+  /** pending は基準時刻が無いので省略される */
   timeSinceLastLogSeconds?: number;
 }
 
-/** 最終ログからの経過秒数を足す。pending は基準時刻が無いので省略する。 */
-export function enrichStatus(baseStatus: HeartbeatStatus): DeviceStatus {
-  const { device, status, lastLogAt } = baseStatus;
+/** デバイスと、その最新ハートビート1件 */
+type DeviceWithLatestHeartbeat = Device & { heartbeats: Heartbeat[] };
 
-  if (status === "pending") {
-    return {
-      device,
-      status,
-      lastLogAt,
-    };
+/**
+ * 最新ハートビートからステータスを判定する。
+ * 閾値判定の唯一の実装。クエリを持たない純粋関数なので、
+ * 一括取得と単体取得のどちらからも同じ結果になる。
+ */
+export function resolveDeviceStatus(
+  device: Device,
+  latest: Heartbeat | undefined,
+): DeviceStatus {
+  const { name } = device;
+
+  if (!latest) {
+    return { device: name, status: "pending", lastLogAt: "" };
   }
 
-  const latestTime = new Date(lastLogAt);
-  const now = new Date();
   const timeSinceLastLogSeconds = Math.floor(
-    (now.getTime() - latestTime.getTime()) / 1000,
+    (Date.now() - new Date(latest.createdAt).getTime()) / 1000,
   );
 
+  const value: status =
+    timeSinceLastLogSeconds > heartbeatConfig.errorThresholdMinutes * 60
+      ? "error"
+      : timeSinceLastLogSeconds > heartbeatConfig.warnThresholdMinutes * 60
+        ? "warn"
+        : "ok";
+
   return {
-    device,
-    status,
-    lastLogAt,
+    device: name,
+    status: value,
+    lastLogAt: latest.createdAt,
     timeSinceLastLogSeconds,
   };
+}
+
+/**
+ * 全デバイスと最新ハートビート1件を1クエリで取得する。
+ * drizzle が相関サブクエリで包むため limit はデバイスごとに適用される。
+ */
+export async function getDevicesWithLatestHeartbeat(
+  db: DB,
+): Promise<DeviceWithLatestHeartbeat[]> {
+  return db.query.devices.findMany({
+    with: {
+      heartbeats: {
+        orderBy: [desc(schema.heartbeats.createdAt)],
+        limit: 1,
+      },
+    },
+  });
 }
 
 /**
@@ -115,12 +94,30 @@ export function enrichStatus(baseStatus: HeartbeatStatus): DeviceStatus {
  * 実装が分かれると出力がずれ、クライアントへの引き継ぎ時に表示がちらつく。
  */
 export async function getDeviceStatuses(db: DB): Promise<DeviceStatus[]> {
-  const devices = await getDevices(db);
-  return (
-    await Promise.all(
-      devices.map((device) => getHeartbeatStatus(db, device.name)),
-    )
-  )
-    .filter((s): s is NonNullable<typeof s> => !!s)
-    .map(enrichStatus);
+  const devices = await getDevicesWithLatestHeartbeat(db);
+  return devices.map(({ heartbeats, ...device }) =>
+    resolveDeviceStatus(device, heartbeats.at(0)),
+  );
+}
+
+/** 単体版。デバイスが存在しない場合は undefined */
+export async function getDeviceStatus(
+  db: DB,
+  deviceName: string,
+): Promise<DeviceStatus | undefined> {
+  const found = await db.query.devices.findFirst({
+    where: eq(schema.devices.name, deviceName),
+    with: {
+      heartbeats: {
+        orderBy: [desc(schema.heartbeats.createdAt)],
+        limit: 1,
+      },
+    },
+  });
+  if (!found) {
+    return undefined;
+  }
+
+  const { heartbeats, ...device } = found;
+  return resolveDeviceStatus(device, heartbeats.at(0));
 }

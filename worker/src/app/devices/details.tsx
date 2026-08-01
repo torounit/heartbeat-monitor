@@ -1,5 +1,8 @@
 import { getDeviceByName } from "../../services/devices";
-import { enrichStatus, getHeartbeatStatus } from "../../services/heartbeats";
+import {
+  getLatestHeartbeatByDeviceId,
+  resolveDeviceStatus,
+} from "../../services/heartbeats";
 import honoFactory from "../../services/honoFactory";
 import { getDeviceReportRows, toReportItems } from "../../services/reports";
 import { deviceDetailsPage } from "../../ui/pages/devices/details";
@@ -34,21 +37,16 @@ const app = honoFactory.createApp().get("/:device", async (c) => {
     });
   }
 
-  const [baseStatus, reportRows] = await Promise.all([
-    getHeartbeatStatus(db, device.name),
+  const [latest, reportRows] = await Promise.all([
+    getLatestHeartbeatByDeviceId(db, device.id),
     getDeviceReportRows(db, device.id),
   ]);
-  if (!baseStatus) {
-    return c.render(<NotFound name={deviceName} />, {
-      title: "デバイスが見つかりません",
-    });
-  }
 
   return renderPage(
     c,
     deviceDetailsPage,
     {
-      status: enrichStatus(baseStatus),
+      status: resolveDeviceStatus(device, latest),
       reports: toReportItems(reportRows),
     },
     { title: device.name },
