@@ -10,7 +10,8 @@ Arduino UNO R4 WiFi と Cloudflare Workers を使用したハートビートモ�
 
 - ハートビート受信とステータス監視（ok / warn / error / pending）
 - ステータス変更時のレポート記録とDiscord通知
-- Webダッシュボードでの状態確認
+- Webダッシュボードでの状態確認（モバイル対応）
+- デバイス詳細ページでのステータス履歴の確認
 
 ## システム構成
 
@@ -35,7 +36,7 @@ Arduino UNO R4 WiFi と Cloudflare Workers を使用したハートビートモ�
 
 - **Backend**: Cloudflare Workers + Hono v4 + Drizzle ORM
 - **Database**: Cloudflare D1 (SQLite)
-- **Frontend**: Hono JSX + Vite + Tailwind CSS
+- **Frontend**: Hono JSX + Vite + Tailwind CSS v4 + daisyUI v5
 - **Device**: Arduino UNO R4 WiFi (PlatformIO)
 
 ## 使い方
@@ -97,7 +98,7 @@ npm run dev
 ### デバイスの登録
 
 ```bash
-curl -X POST https://your-worker.workers.dev/api/locations/ \
+curl -X POST https://your-worker.workers.dev/api/devices \
   -H "Content-Type: application/json" \
   -d '{"name": "Arduino-Device-1"}'
 ```
@@ -112,7 +113,23 @@ curl -X POST https://your-worker.workers.dev/api/heartbeat \
 
 ### ダッシュボード
 
-ブラウザで `https://your-worker.workers.dev/` にアクセス
+ブラウザで `https://your-worker.workers.dev/` にアクセスします。
+
+- **トップページ**: 全デバイスのステータス一覧と、デバイスごとの最新レポート5件
+- **デバイス詳細**: `/devices/<デバイス名>` でステータス概要とレポート全件を表示。トップページのカードや「すべて見る」リンクから遷移できます
+
+### API エンドポイント
+
+| メソッド | パス | 説明 |
+| --- | --- | --- |
+| `POST` | `/api/heartbeat` | ハートビートを受信する |
+| `GET` / `POST` | `/api/devices` | デバイスの一覧取得・登録 |
+| `PUT` / `DELETE` | `/api/devices/:name` | デバイスの更新・削除 |
+| `GET` | `/api/devices/reports` | 全デバイスとそのレポートを取得（`?limit=` でデバイスごとの件数を制限） |
+| `GET` | `/api/reports` | 全レポートを新しい順に取得 |
+| `GET` | `/api/reports/:device` | 指定デバイスのレポートを新しい順に取得 |
+| `GET` | `/api/status` | 全デバイスのステータスを取得 |
+| `GET` | `/api/status/:device` | 指定デバイスのステータスを取得 |
 
 ## Arduino デバイスのセットアップ
 
