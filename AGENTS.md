@@ -54,8 +54,7 @@ heartbeat-monitor/
 ### TypeScript/JavaScript (Worker)
 
 #### スタイルガイド
-- **Linter**: ESLint with @hono/eslint-config, typescript-eslint (strict + stylistic)
-- **Formatter**: Prettier
+- **Linter / Formatter**: Biome（`worker/biome.json`、recommended ルール）
 - **TypeScript**: strict mode 有効
 - **Module System**: ESNext with Bundler resolution
 
@@ -134,9 +133,11 @@ npm install
 #### 開発
 ```bash
 npm run dev          # 開発サーバー起動（ホットリロード有効）
-npm run lint         # ESLintでコードチェック
-npm run lint:fix     # ESLintで自動修正
-npm run format       # Prettierでフォーマット
+npm run lint         # Biomeでコードチェック
+npm run lint:fix     # Biomeで自動修正
+npm run format       # Biomeでフォーマット
+npm run check        # Biomeでlint・format・import順をまとめてチェック
+npm run check:fix    # 上記をまとめて自動修正
 npm run tsc          # TypeScriptの型チェック
 ```
 
@@ -232,7 +233,7 @@ Web ダッシュボード（全デバイスのステータス一覧 + デバイ�
 
 1. **変更前**: 関連するテストを確認・実行する
 2. **コード変更**: 最小限の変更を心がける
-3. **Lint/Format**: `npm run lint:fix && npm run format` を実行
+3. **Lint/Format**: `npm run check:fix` を実行
 4. **型チェック**: `npm run tsc` で TypeScript エラーがないか確認
 5. **テスト**: `npm run test` で既存テストが通ることを確認
 6. **動作確認**: `npm run dev` でローカルで動作確認

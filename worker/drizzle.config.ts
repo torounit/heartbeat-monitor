@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// biome-ignore-all lint/style/noNonNullAssertion: .env で必須の値のため
 import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 export default defineConfig({

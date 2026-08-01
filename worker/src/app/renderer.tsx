@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/prefer-function-type -- 宣言マージには interface が必要で、type エイリアスにするとマージされない */
 import { jsxRenderer } from "hono/jsx-renderer";
 
 // c.render(node, { title }) を型安全に使えるようにする宣言マージ
 declare module "hono" {
   interface ContextRenderer {
+    // biome-ignore lint/style/useShorthandFunctionType: 宣言マージには interface が必要で、type エイリアスにするとマージされない
     (content: string | Promise<string>, props?: { title?: string }): Response;
   }
 }

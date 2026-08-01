@@ -3,9 +3,11 @@
 - `npm run test`: run tests.
 - `npm run build`: Build project.
 - `npm run tsc`: Type check.
-- `npm run lint`: Run linter.
+- `npm run lint`: Run linter (Biome).
 - `npm run lint:fix`: Run linter and fix issues.
-- `npm run format`: Format code.
+- `npm run format`: Format code (Biome).
+- `npm run check`: Run lint + format + import sorting checks (Biome).
+- `npm run check:fix`: Run the above and fix issues.
 - `npm run migrate:local`: Run local database migrations.
 - `npm run migrate:remote`: Run remote database migrations.
 - `npm run seed`: Seed local database with dummy data.

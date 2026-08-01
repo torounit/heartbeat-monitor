@@ -25,7 +25,8 @@
   },
   "extensions": {
     "recommendations": [
-      "platformio.platformio-ide"
+      "platformio.platformio-ide",
+      "biomejs.biome"
     ]
   }
 }
