@@ -2,11 +2,13 @@ import honoFactory from "../services/honoFactory";
 import api from "./api";
 import dashboard from "./dashboard";
 import devicePage from "./devices";
+import { errorHandler } from "./errors";
 import { renderer } from "./renderer";
 
 const app = honoFactory
   .createApp()
   .use(renderer)
+  .onError(errorHandler)
   .route("/api", api)
   .route("/devices", devicePage)
   .route("/", dashboard)

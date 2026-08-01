@@ -1,15 +1,14 @@
-import { ErrorBoundary, Suspense, use } from "hono/jsx/dom";
-
 import { client } from "../api";
 import ElapsedTime from "../components/ElapsedTime";
-import ErrorState from "../components/ErrorState";
-import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
 import StatusBadge from "../components/StatusBadge";
+import type { DeviceDetailData } from "../initialData";
 import { usePolling } from "../polling";
 import { encodeDeviceName, formatDateTime } from "../utils";
 
-async function fetchDeviceDetail(deviceName: string) {
+export async function fetchDeviceDetail(
+  deviceName: string,
+): Promise<DeviceDetailData> {
   // hono の RPC クライアントはパスパラメータをエンコードしないので自前で行う
   const param = { device: encodeDeviceName(deviceName) };
 
@@ -31,14 +30,10 @@ async function fetchDeviceDetail(deviceName: string) {
   return { status, reports };
 }
 
-function Detail({
-  deviceName,
-  detailPromise,
-}: {
-  deviceName: string;
-  detailPromise: ReturnType<typeof fetchDeviceDetail>;
-}) {
-  const { status, reports } = usePolling(use(detailPromise), () =>
+type DeviceDetailProps = DeviceDetailData & { deviceName: string };
+
+function Detail({ deviceName, status, reports }: DeviceDetailProps) {
+  const live = usePolling({ status, reports }, () =>
     fetchDeviceDetail(deviceName),
   );
 
@@ -46,22 +41,22 @@ function Detail({
     <div class="space-y-6">
       <div class="flex flex-wrap items-center gap-3">
         <h2 class="text-xl font-semibold wrap-break-word sm:text-2xl">
-          {status.device}
+          {live.status.device}
         </h2>
-        <StatusBadge status={status.status} />
+        <StatusBadge status={live.status.status} />
       </div>
 
       <div class="stats stats-vertical w-full border border-base-300 bg-base-100 shadow-sm sm:stats-horizontal">
         <div class="stat">
           <div class="stat-title">最終ログ</div>
           <div class="stat-value text-lg sm:text-2xl">
-            {formatDateTime(status.lastLogAt)}
+            {formatDateTime(live.status.lastLogAt)}
           </div>
         </div>
         <div class="stat">
           <div class="stat-title">経過時間</div>
           <div class="stat-value text-lg sm:text-2xl">
-            <ElapsedTime seconds={status.timeSinceLastLogSeconds} />
+            <ElapsedTime seconds={live.status.timeSinceLastLogSeconds} />
           </div>
         </div>
       </div>
@@ -70,7 +65,7 @@ function Detail({
         <h3 class="text-lg font-semibold">ステータス履歴</h3>
         <div class="card border border-base-300 bg-base-100 shadow-sm">
           <div class="card-body p-4">
-            <ReportList reports={reports} />
+            <ReportList reports={live.reports} />
           </div>
         </div>
       </section>
@@ -78,7 +73,7 @@ function Detail({
   );
 }
 
-function DeviceDetail({ deviceName }: { deviceName: string }) {
+function DeviceDetail({ deviceName, status, reports }: DeviceDetailProps) {
   return (
     <div class="space-y-4">
       <div class="breadcrumbs text-sm">
@@ -90,14 +85,7 @@ function DeviceDetail({ deviceName }: { deviceName: string }) {
         </ul>
       </div>
 
-      <ErrorBoundary fallback={<ErrorState />}>
-        <Suspense fallback={<Loading />}>
-          <Detail
-            deviceName={deviceName}
-            detailPromise={fetchDeviceDetail(deviceName)}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      <Detail deviceName={deviceName} status={status} reports={reports} />
     </div>
   );
 }

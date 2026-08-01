@@ -36,10 +36,10 @@ heartbeat-monitor/
 ├── .github/              # GitHub設定とCopilot instructions
 ├── worker/               # Cloudflare Workers アプリケーション
 │   ├── src/
-│   │   ├── app/         # APIルートとダッシュボード
-│   │   ├── client/      # フロントエンドコンポーネント
+│   │   ├── app/         # APIルートとページルート
+│   │   ├── ui/          # 画面コンポーネント（サーバー・クライアント共用）
 │   │   ├── db/          # データベーススキーマ
-│   │   └── services/    # ビジネスロジック
+│   │   └── services/    # ビジネスロジックとデータ取得
 │   ├── migrations/      # D1データベースマイグレーション
 │   ├── scripts/         # ユーティリティスクリプト
 │   └── test/            # テストファイル
@@ -65,6 +65,20 @@ heartbeat-monitor/
 - 型定義は `types.ts` または各モジュール内で定義する
 - Drizzle ORM のスキーマは `db/schema.ts` に集約する
 - 環境変数は `CloudflareBindings` 型で型安全にアクセスする
+
+#### サーバーサイドレンダリング
+`src/ui/` のコンポーネントはサーバーとブラウザの両方で描画される。クライアントは
+`#root` の `data-initial` からサーバーと同じデータを受け取り、初回描画結果が
+サーバー HTML と一致するため差し替えが目に見えない。
+
+- **画面が使うデータ取得は `services/` に置き、SSR ルートと API ルートで共有する。**
+  実装が分かれると出力がずれ、クライアントへの引き継ぎ時に表示がちらつく
+- `src/ui/` から `services/` を import する際は必ず `import type`。値 import すると
+  drizzle がブラウザバンドルに入る（`grep -c drizzle dist/static/client.js` が 0 であること）
+- **`src/ui/` で実行環境に依存する値を使わない。** ローカルタイムゾーンや
+  `navigator` などはサーバーとブラウザで結果が変わり、ちらつきの原因になる。
+  日時整形は `Asia/Tokyo` に固定済み
+- `useEffect` はサーバーでは実行されない。`useState` の初期値がそのまま描画される
 
 #### データベース
 - Drizzle ORM を使用してクエリを記述する

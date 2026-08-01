@@ -1,58 +1,38 @@
-import { ErrorBoundary, Suspense, use } from "hono/jsx/dom";
-
-import type { DeviceStatus, DeviceWithReports } from "../api";
-import { client } from "../api";
+import type { DeviceStatus } from "../../services/heartbeats";
+import type { DeviceWithReports } from "../../services/reports";
+import { fetchDeviceReports, fetchStatus } from "../api";
 import DeviceStatusCard from "../components/DeviceStatusCard";
-import ErrorState from "../components/ErrorState";
-import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
+import type { DashboardData } from "../initialData";
 import { usePolling } from "../polling";
 import { deviceHref } from "../utils";
 
-const REPORTS_PREVIEW_LIMIT = 5;
+function Status({ statuses }: { statuses: DeviceStatus[] }) {
+  const live = usePolling(statuses, fetchStatus);
 
-async function fetchStatus(): Promise<DeviceStatus[]> {
-  const res = await client.api.status.$get();
-  return res.json();
-}
-
-async function fetchReports(): Promise<DeviceWithReports[]> {
-  const res = await client.api.devices.reports.$get({
-    query: { limit: String(REPORTS_PREVIEW_LIMIT) },
-  });
-  return res.json();
-}
-
-function Status({ statusPromise }: { statusPromise: Promise<DeviceStatus[]> }) {
-  const statuses = usePolling(use(statusPromise), fetchStatus);
-
-  if (statuses.length === 0) {
+  if (live.length === 0) {
     return <p class="text-base-content/60">デバイスが登録されていません</p>;
   }
 
   return (
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {statuses.map((status) => (
+      {live.map((status) => (
         <DeviceStatusCard key={status.device} status={status} />
       ))}
     </div>
   );
 }
 
-function Reports({
-  deviceReportsPromise,
-}: {
-  deviceReportsPromise: Promise<DeviceWithReports[]>;
-}) {
-  const devices = usePolling(use(deviceReportsPromise), fetchReports);
+function Reports({ deviceReports }: { deviceReports: DeviceWithReports[] }) {
+  const live = usePolling(deviceReports, fetchDeviceReports);
 
-  if (devices.length === 0) {
+  if (live.length === 0) {
     return <p class="text-base-content/60">デバイスが登録されていません</p>;
   }
 
   return (
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {devices.map(({ name, reports }) => (
+      {live.map(({ name, reports }) => (
         <div
           key={name}
           class="card border border-base-300 bg-base-100 shadow-sm"
@@ -73,25 +53,17 @@ function Reports({
   );
 }
 
-function Dashboard() {
+function Dashboard({ statuses, deviceReports }: DashboardData) {
   return (
     <div class="space-y-10">
       <section class="space-y-4">
         <h2 class="text-xl font-semibold sm:text-2xl">Status</h2>
-        <ErrorBoundary fallback={<ErrorState />}>
-          <Suspense fallback={<Loading />}>
-            <Status statusPromise={fetchStatus()} />
-          </Suspense>
-        </ErrorBoundary>
+        <Status statuses={statuses} />
       </section>
 
       <section class="space-y-4">
         <h2 class="text-xl font-semibold sm:text-2xl">Reports</h2>
-        <ErrorBoundary fallback={<ErrorState />}>
-          <Suspense fallback={<Loading />}>
-            <Reports deviceReportsPromise={fetchReports()} />
-          </Suspense>
-        </ErrorBoundary>
+        <Reports deviceReports={deviceReports} />
       </section>
     </div>
   );

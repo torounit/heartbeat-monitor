@@ -1,9 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import * as schema from "../../db/schema";
 import honoFactory from "../../services/honoFactory";
+import { getDevicesWithReports } from "../../services/reports";
 
 const devices = honoFactory
   .createApp()
@@ -23,16 +24,8 @@ const devices = honoFactory
     async (c) => {
       const { limit } = c.req.valid("query");
       const db = c.get("db");
-      const reportsList = await db.query.devices.findMany({
-        with: {
-          reports: {
-            orderBy: [desc(schema.reports.createdAt)],
-            limit,
-          },
-        },
-      });
 
-      return c.json(reportsList);
+      return c.json(await getDevicesWithReports(db, limit));
     },
   )
   .post(
