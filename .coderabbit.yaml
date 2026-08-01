@@ -53,8 +53,10 @@ reviews:
     auto_incremental_review: true
 
   tools:
-    eslint:
+    biome:
       enabled: true
+    eslint:
+      enabled: false
     gitleaks:
       enabled: true
     actionlint:

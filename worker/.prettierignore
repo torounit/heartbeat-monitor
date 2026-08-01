@@ -1,6 +1,0 @@
-# drizzle-kit が生成・管理するため整形しない
-migrations/
-
-dist/
-.wrangler/
-worker-configuration.d.ts

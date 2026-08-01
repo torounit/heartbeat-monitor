@@ -1,5 +1,5 @@
-import { sql, relations } from "drizzle-orm";
-import { int, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+import { relations, sql } from "drizzle-orm";
+import { index, int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { status } from "../types";
 
 export const devices = sqliteTable("devices", {

@@ -1,7 +1,7 @@
+import { execSync } from "node:child_process";
+import { existsSync, readdirSync } from "node:fs";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import { execSync } from "node:child_process";
-import { readdirSync, existsSync } from "node:fs";
 import * as schema from "../src/db/schema";
 import type { status } from "../src/types";
 
@@ -47,7 +47,6 @@ function getDatabasePath(): string {
       }
     } catch {
       // このファイルは使えない、次へ
-      continue;
     }
   }
 

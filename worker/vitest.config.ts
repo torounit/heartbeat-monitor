@@ -1,8 +1,8 @@
+import path from "node:path";
 import {
   defineWorkersProject,
   readD1Migrations,
 } from "@cloudflare/vitest-pool-workers/config";
-import path from "node:path";
 
 // 本番の Cloudflare Workers は UTC で動くが、ローカルの workerd は
 // ホストのタイムゾーンを継承してしまう。日時整形の検証が開発者の環境に

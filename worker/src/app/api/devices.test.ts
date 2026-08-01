@@ -1,6 +1,6 @@
 import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import * as schema from "../../db/schema";
 import devices from "./devices";
