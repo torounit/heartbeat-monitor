@@ -1,5 +1,6 @@
 import type { DeviceStatus } from "../api";
-import { deviceHref, formatDateTime, formatElapsed } from "../utils";
+import { deviceHref, formatDateTime } from "../utils";
+import ElapsedTime from "./ElapsedTime";
 import StatusBadge, { statusAccentClass } from "./StatusBadge";
 
 function DeviceStatusCard({ status }: { status: DeviceStatus }) {
@@ -18,7 +19,7 @@ function DeviceStatusCard({ status }: { status: DeviceStatus }) {
           <dd class="text-right">{formatDateTime(status.lastLogAt)}</dd>
           <dt class="text-base-content/60">経過</dt>
           <dd class="text-right">
-            {formatElapsed(status.timeSinceLastLogSeconds)}
+            <ElapsedTime seconds={status.timeSinceLastLogSeconds} />
           </dd>
         </dl>
       </div>

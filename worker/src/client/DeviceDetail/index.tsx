@@ -1,10 +1,12 @@
 import { ErrorBoundary, Suspense, use } from "hono/jsx/dom";
 
 import { client } from "../api";
+import ElapsedTime from "../components/ElapsedTime";
 import ErrorState from "../components/ErrorState";
+import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
 import StatusBadge from "../components/StatusBadge";
-import { encodeDeviceName, formatDateTime, formatElapsed } from "../utils";
+import { encodeDeviceName, formatDateTime } from "../utils";
 
 async function fetchDeviceDetail(deviceName: string) {
   // hono の RPC クライアントはパスパラメータをエンコードしないので自前で行う
@@ -54,7 +56,7 @@ function Detail({
         <div class="stat">
           <div class="stat-title">経過時間</div>
           <div class="stat-value text-lg sm:text-2xl">
-            {formatElapsed(status.timeSinceLastLogSeconds)}
+            <ElapsedTime seconds={status.timeSinceLastLogSeconds} />
           </div>
         </div>
       </div>
@@ -84,7 +86,7 @@ function DeviceDetail({ deviceName }: { deviceName: string }) {
       </div>
 
       <ErrorBoundary fallback={<ErrorState />}>
-        <Suspense fallback={<p class="text-base-content/60">Loading...</p>}>
+        <Suspense fallback={<Loading />}>
           <Detail detailPromise={fetchDeviceDetail(deviceName)} />
         </Suspense>
       </ErrorBoundary>

@@ -4,6 +4,7 @@ import type { DeviceStatus, DeviceWithReports } from "../api";
 import { client } from "../api";
 import DeviceStatusCard from "../components/DeviceStatusCard";
 import ErrorState from "../components/ErrorState";
+import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
 import { deviceHref } from "../utils";
 
@@ -19,10 +20,6 @@ async function fetchReports(): Promise<DeviceWithReports[]> {
     query: { limit: String(REPORTS_PREVIEW_LIMIT) },
   });
   return res.json();
-}
-
-function Loading() {
-  return <p class="text-base-content/60">Loading...</p>;
 }
 
 function Status({ statusPromise }: { statusPromise: Promise<DeviceStatus[]> }) {
