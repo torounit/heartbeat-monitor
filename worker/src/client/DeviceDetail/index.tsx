@@ -6,6 +6,7 @@ import ErrorState from "../components/ErrorState";
 import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
 import StatusBadge from "../components/StatusBadge";
+import { usePolling } from "../polling";
 import { encodeDeviceName, formatDateTime } from "../utils";
 
 async function fetchDeviceDetail(deviceName: string) {
@@ -31,11 +32,15 @@ async function fetchDeviceDetail(deviceName: string) {
 }
 
 function Detail({
+  deviceName,
   detailPromise,
 }: {
+  deviceName: string;
   detailPromise: ReturnType<typeof fetchDeviceDetail>;
 }) {
-  const { status, reports } = use(detailPromise);
+  const { status, reports } = usePolling(use(detailPromise), () =>
+    fetchDeviceDetail(deviceName),
+  );
 
   return (
     <div class="space-y-6">
@@ -87,7 +92,10 @@ function DeviceDetail({ deviceName }: { deviceName: string }) {
 
       <ErrorBoundary fallback={<ErrorState />}>
         <Suspense fallback={<Loading />}>
-          <Detail detailPromise={fetchDeviceDetail(deviceName)} />
+          <Detail
+            deviceName={deviceName}
+            detailPromise={fetchDeviceDetail(deviceName)}
+          />
         </Suspense>
       </ErrorBoundary>
     </div>

@@ -6,6 +6,7 @@ import DeviceStatusCard from "../components/DeviceStatusCard";
 import ErrorState from "../components/ErrorState";
 import Loading from "../components/Loading";
 import ReportList from "../components/ReportList";
+import { usePolling } from "../polling";
 import { deviceHref } from "../utils";
 
 const REPORTS_PREVIEW_LIMIT = 5;
@@ -23,7 +24,7 @@ async function fetchReports(): Promise<DeviceWithReports[]> {
 }
 
 function Status({ statusPromise }: { statusPromise: Promise<DeviceStatus[]> }) {
-  const statuses = use(statusPromise);
+  const statuses = usePolling(use(statusPromise), fetchStatus);
 
   if (statuses.length === 0) {
     return <p class="text-base-content/60">デバイスが登録されていません</p>;
@@ -43,7 +44,7 @@ function Reports({
 }: {
   deviceReportsPromise: Promise<DeviceWithReports[]>;
 }) {
-  const devices = use(deviceReportsPromise);
+  const devices = usePolling(use(deviceReportsPromise), fetchReports);
 
   if (devices.length === 0) {
     return <p class="text-base-content/60">デバイスが登録されていません</p>;
